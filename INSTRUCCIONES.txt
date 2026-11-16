@@ -1,0 +1,12 @@
+HELLO KATY - PROYECTO PARA CREAR EL APK
+
+1. En GitHub crea un repositorio NUEVO llamado hello-katy.
+2. Sube el contenido de esta carpeta a la raíz del repositorio (incluida la carpeta .github).
+3. Abre la pestaña Actions.
+4. Selecciona "Crear APK de Hello Katy" y pulsa Run workflow si no se inicia solo.
+5. Espera a que termine en verde.
+6. En la ejecución, baja a Artifacts y descarga Hello-Katy-APK.
+7. Extrae el ZIP y abre app-debug.apk en tu Android para instalarlo. Puede pedir permiso para instalar apps de esa fuente.
+
+Este paquete contiene el código fuente y la automatización de compilación; NO contiene todavía un APK compilado.
+La voz es la síntesis disponible en el dispositivo, no la voz oficial de Hello Kitty. El micrófono puede requerir permisos y compatibilidad del dispositivo.

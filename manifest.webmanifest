@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Hello Katy",
+  "short_name": "Hello Katy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff1f8",
+  "theme_color": "#ffb7d5",
+  "description": "Minijuegos kawaii y conversación de prueba en español."
+}
