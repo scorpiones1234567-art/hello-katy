@@ -1,4 +1,3 @@
-
 package com.hellokaty;
 
 import android.Manifest;
@@ -15,6 +14,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -23,27 +23,41 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextToSpeech tts;
     private SpeechRecognizer recognizer;
+
     private static final int REQ_AUDIO = 41;
-    private boolean ttsReady = false;
 
     @Override
     public void onCreate(Bundle b) {
         super.onCreate(b);
 
+        // ==========================
+        // VOZ DE KATTY
+        // ==========================
         tts = new TextToSpeech(this, status -> {
+
             if (status == TextToSpeech.SUCCESS) {
-                int result = tts.setLanguage(new Locale("es", "MX"));
 
-                if (result != TextToSpeech.LANG_MISSING_DATA &&
-                    result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                Locale mexico = new Locale("es", "MX");
 
-                    tts.setPitch(1.75f);
-                    tts.setSpeechRate(1.08f);
-                    ttsReady = true;
+                int result = tts.setLanguage(mexico);
+
+                // Voz más aguda y juguetona
+                tts.setPitch(1.35f);
+                tts.setSpeechRate(0.95f);
+
+                // Si el teléfono no tiene español de México,
+                // intentamos español general.
+                if (result == TextToSpeech.LANG_MISSING_DATA ||
+                    result == TextToSpeech.LANG_NOT_SUPPORTED) {
+
+                    tts.setLanguage(new Locale("es", "ES"));
                 }
             }
         });
 
+        // ==========================
+        // WEBVIEW
+        // ==========================
         web = new WebView(this);
 
         WebSettings s = web.getSettings();
@@ -57,27 +71,34 @@ public class MainActivity extends Activity {
         web.setWebChromeClient(new WebChromeClient());
 
         setContentView(web);
+
         web.loadUrl("file:///android_asset/index.html");
     }
 
+    // ==========================
+    // PUENTE ENTRE HTML Y ANDROID
+    // ==========================
     private class KatyBridge {
 
         @JavascriptInterface
         public void speak(String text) {
+
             runOnUiThread(() -> {
-                if (tts != null && ttsReady && text != null) {
-                    tts.stop();
 
-                    tts.setPitch(1.75f);
-                    tts.setSpeechRate(1.08f);
+                if (tts == null || text == null || text.trim().isEmpty()) {
+                    return;
+                }
 
-                    tts.speak(
-                        text,
+                String frase = limpiarTexto(text);
+
+                // IMPORTANTE:
+                // Enviamos la frase completa al TTS.
+                tts.speak(
+                        frase,
                         TextToSpeech.QUEUE_FLUSH,
                         null,
-                        "KATY"
-                    );
-                }
+                        "KATTY_VOICE"
+                );
             });
         }
 
@@ -87,20 +108,54 @@ public class MainActivity extends Activity {
         }
     }
 
+    // ==========================
+    // LIMPIAR TEXTO PARA LA VOZ
+    // ==========================
+    private String limpiarTexto(String texto) {
+
+        String t = texto.trim();
+
+        // Evita problemas con espacios repetidos
+        t = t.replaceAll("\\s+", " ");
+
+        // Evita que algunos símbolos hagan
+        // que el motor pronuncie cosas extrañas.
+        t = t.replace("…", ".");
+        t = t.replace("🎀", "");
+        t = t.replace("💙", "");
+        t = t.replace("💗", "");
+        t = t.replace("🐱", "");
+        t = t.replace("⭐", "");
+        t = t.replace("🍰", "");
+        t = t.replace("🎮", "");
+        t = t.replace("😴", "");
+        t = t.replace("💗", "");
+
+        return t.trim();
+    }
+
+    // ==========================
+    // RECONOCIMIENTO DE VOZ
+    // ==========================
     private void beginListening() {
 
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissions(
-                new String[]{Manifest.permission.RECORD_AUDIO},
-                REQ_AUDIO
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    REQ_AUDIO
             );
+
             return;
         }
 
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            jsError("El reconocimiento de voz no está disponible en este teléfono.");
+
+            jsError(
+                    "El reconocimiento de voz no está disponible en este teléfono."
+            );
+
             return;
         }
 
@@ -112,118 +167,111 @@ public class MainActivity extends Activity {
 
         recognizer.setRecognitionListener(new RecognitionListener() {
 
-            public void onReadyForSpeech(Bundle p) {}
-
-            public void onBeginningOfSpeech() {}
-
-            public void onRmsChanged(float r) {}
-
-            public void onBufferReceived(byte[] b) {}
-
-            public void onEndOfSpeech() {}
-
-            public void onError(int e) {
-                jsError("No pude escucharte. Inténtalo otra vez.");
+            @Override
+            public void onReadyForSpeech(Bundle params) {
             }
 
-            public void onResults(Bundle b) {
+            @Override
+            public void onBeginningOfSpeech() {
+            }
 
-                ArrayList<String> a =
-                    b.getStringArrayList(
-                        SpeechRecognizer.RESULTS_RECOGNITION
-                    );
+            @Override
+            public void onRmsChanged(float rmsdB) {
+            }
 
-                if (a != null && !a.isEmpty()) {
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+            }
 
-                    String words = a.get(0);
+            @Override
+            public void onEndOfSpeech() {
+            }
+
+            @Override
+            public void onError(int error) {
+
+                jsError(
+                        "No pude escucharte. Inténtalo otra vez."
+                );
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+
+                ArrayList<String> lista =
+                        results.getStringArrayList(
+                                SpeechRecognizer.RESULTS_RECOGNITION
+                        );
+
+                if (lista != null && !lista.isEmpty()) {
+
+                    String texto = lista.get(0);
 
                     web.post(() -> {
+
                         web.evaluateJavascript(
-                            "onAndroidSpeech(" +
-                            org.json.JSONObject.quote(words) +
-                            ")",
-                            null
+                                "onAndroidSpeech(" +
+                                org.json.JSONObject.quote(texto) +
+                                ")",
+                                null
                         );
                     });
                 }
             }
 
-            public void onPartialResults(Bundle b) {}
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+            }
 
-            public void onEvent(int t, Bundle p) {}
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
         });
 
-        Intent i = new Intent(
-            RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+        Intent intent =
+                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+        intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         );
 
-        i.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE,
+                "es-MX"
         );
 
-        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-MX");
-        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "es-MX");
-        i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Habla con Katty");
-        i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
+                "es-MX"
+        );
 
-        recognizer.startListening(i);
+        intent.putExtra(
+                RecognizerIntent.EXTRA_PROMPT,
+                "Habla con Katty"
+        );
+
+        recognizer.startListening(intent);
     }
 
-    private void jsError(String m) {
-        if (web != null) {
-            web.post(() -> web.evaluateJavascript(
-                "onAndroidSpeechError(" +
-                org.json.JSONObject.quote(m) +
-                ")",
-                null
-            ));
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(
-            int r, String[] p, int[] g) {
-
-        super.onRequestPermissionsResult(r, p, g);
-
-        if (r == REQ_AUDIO) {
-            if (g.length > 0 &&
-                g[0] == PackageManager.PERMISSION_GRANTED) {
-
-                beginListening();
-
-            } else {
-                jsError("Necesito permiso de micrófono para escucharte.");
-            }
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-
-        if (recognizer != null) {
-            recognizer.destroy();
-        }
-
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
+    // ==========================
+    // ERROR DE VOZ
+    // ==========================
+    private void jsError(String mensaje) {
 
         if (web != null) {
-            web.destroy();
-        }
 
-        super.onDestroy();
-    }
+            web.post(() -> {
 
-    @Override
-    public void onBackPressed() {
-        if (web != null && web.canGoBack()) {
-            web.goBack();
-        } else {
-            super.onBackPressed();
+                web.evaluateJavascript(
+                        "onAndroidSpeechError(" +
+                        org.json.JSONObject.quote(mensaje) +
+                        ")",
+                        null
+                );
+            });
         }
     }
-}
+
+    // ==========================
+    // PERMISO DEL MICRÓF
