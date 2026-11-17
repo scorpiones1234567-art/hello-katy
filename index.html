@@ -64,6 +64,70 @@ button:active{transform:translateY(3px);box-shadow:0 1px #cf4e8b}
 input{width:100%;border:2px solid #f4c4db;border-radius:14px;padding:12px;font-size:16px;margin:6px 0}
 footer{text-align:center;font-size:12px;padding:15px}
 @media(max-width:420px){.room{min-height:410px}.kitty-wrap{transform:translate(-50%,-48%) scale(.87)}.speech{font-size:13px;max-width:45%}.actions button{font-size:13px;padding:11px 4px}}
+
+/* NUEVA APARIENCIA DE KATTY */
+.kitty-wrap {
+  perspective: 900px;
+}
+
+.kitty {
+  filter: drop-shadow(0 12px 10px #765b8540);
+  transform-style: preserve-3d;
+}
+
+.head {
+  background: linear-gradient(145deg, #fff, #e9f3ff);
+  box-shadow:
+    inset -9px -9px 16px #cbd9ed,
+    0 5px 12px #8aa5c455;
+  transform: rotateY(-5deg);
+}
+
+.bow:before,
+.bow:after {
+  background: linear-gradient(135deg, #75caff, #1769d2);
+  border: 3px solid #1454a5;
+  box-shadow: inset 2px 2px 5px #ffffff90;
+}
+
+.knot {
+  background: #2789e8;
+  border-color: #1454a5;
+}
+
+.bodykitty {
+  background: linear-gradient(135deg, #82d0ff, #287bd6);
+  border-color: #1766bd;
+  box-shadow: inset -5px -6px 10px #1454a555;
+}
+
+.collar {
+  background: #fff;
+}
+
+.buttondot {
+  background: #ffdb70;
+  box-shadow: 0 0 5px #fff;
+}
+
+.eye {
+  animation: blink 4s infinite;
+  transform-origin: center;
+}
+
+@keyframes blink {
+  0%, 44%, 48%, 100% { transform: scaleY(1); }
+  46% { transform: scaleY(.08); }
+}
+
+.kitty:active {
+  transform: scale(.94) rotateY(10deg);
+}
+
+.ear {
+  background: linear-gradient(145deg, #fff, #e3efff);
+}
+
 </style>
 </head>
 <body>
