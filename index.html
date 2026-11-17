@@ -7,11 +7,11 @@
 <meta name="theme-color" content="#9bd6ff">
 <title>Hello Katty</title>
 <style>
-:root{--pink:#ffacd1;--blue:#75caff;--hot:#287bd6;--dark:#713858}
+:root{--blue:#75caff;--dark:#713858}
 *{box-sizing:border-box}
 body{margin:0;color:var(--dark);font-family:system-ui,sans-serif;background:radial-gradient(circle,#fff,#eaf6ff 60%,#f5eaff);min-height:100vh}
 header{text-align:center;padding:15px;background:linear-gradient(120deg,#80cfff,#d7c9ff);border-radius:0 0 25px 25px}
-h1{margin:0;color:white;font-size:35px;text-shadow:0 3px #397fbd}
+h1{margin:0;color:white;font-size:32px;text-shadow:0 3px #397fbd}
 .top{display:flex;gap:10px;margin:12px auto;padding:0 12px;max-width:700px;font-weight:bold}
 .meter,.coins{background:white;border:2px solid #b8ddff;border-radius:25px;padding:9px;flex:1}
 .bar{height:9px;background:#d5eafa;border-radius:20px;margin-top:5px}
@@ -24,12 +24,12 @@ main{max-width:700px;margin:auto;padding:0 12px 25px}
 .rug{position:absolute;bottom:2%;left:13%;width:74%;height:25%;background:#8fc9f5;border:8px solid #cbe8ff;border-radius:50%}
 .speech{position:absolute;z-index:5;right:3%;top:6%;max-width:47%;background:white;border:3px solid #78b9ed;border-radius:22px;padding:12px;text-align:center;font-weight:bold}
 .kitty-wrap{position:absolute;z-index:2;left:50%;top:51%;transform:translate(-50%,-50%);width:245px;height:330px;display:flex;align-items:flex-end;justify-content:center;perspective:900px}
-.kitty{position:relative;width:220px;height:300px;transform-origin:50% 90%;animation:bob 2.5s ease-in-out infinite;filter:drop-shadow(0 12px 10px #765b8540);transform-style:preserve-3d}
+.kitty{position:relative;width:220px;height:300px;transform-origin:50% 90%;animation:bob 2.5s ease-in-out infinite;filter:drop-shadow(0 12px 10px #765b8540)}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
 .ear{position:absolute;top:5px;width:82px;height:95px;background:linear-gradient(145deg,#fff,#e3efff);border-radius:22px 60px 12px 35px}
 .ear.left{left:7px;transform:rotate(-25deg)}
 .ear.right{right:7px;transform:scaleX(-1) rotate(-25deg)}
-.head{position:absolute;z-index:1;top:35px;width:220px;height:185px;background:linear-gradient(145deg,#fff,#e9f3ff);border-radius:48% 48% 43% 43%;box-shadow:inset -9px -9px 16px #cbd9ed,0 5px 12px #8aa5c455;transform:rotateY(-5deg)}
+.head{position:absolute;z-index:1;top:35px;width:220px;height:185px;background:linear-gradient(145deg,#fff,#e9f3ff);border-radius:48% 48% 43% 43%;box-shadow:inset -9px -9px 16px #cbd9ed,0 5px 12px #8aa5c455}
 .eye{position:absolute;top:117px;width:13px;height:21px;background:#28212a;border-radius:50%;z-index:3;animation:blink 4s infinite}
 .eye.left{left:61px}.eye.right{right:61px}
 @keyframes blink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.08)}}
@@ -38,10 +38,10 @@ main{max-width:700px;margin:auto;padding:0 12px 25px}
 .w1{left:-7px;transform:rotate(12deg)}.w2{left:-9px;top:165px}.w3{left:-5px;top:180px;transform:rotate(-12deg)}
 .w4{right:-7px;transform:rotate(-12deg)}.w5{right:-9px;top:165px}.w6{right:-5px;top:180px;transform:rotate(12deg)}
 .bow{position:absolute;z-index:4;top:26px;right:26px;width:66px;height:43px}
-.bow:before,.bow:after{content:"";position:absolute;top:0;width:34px;height:38px;background:linear-gradient(135deg,#75caff,#1769d2);border:3px solid #1454a5;border-radius:75% 25% 65% 35%;box-shadow:inset 2px 2px 5px #ffffff90}
+.bow:before,.bow:after{content:"";position:absolute;top:0;width:34px;height:38px;background:linear-gradient(135deg,#75caff,#1769d2);border:3px solid #1454a5;border-radius:75% 25% 65% 35%}
 .bow:before{left:0;transform:rotate(25deg)}.bow:after{right:0;transform:scaleX(-1) rotate(25deg)}
 .knot{position:absolute;z-index:5;left:27px;top:13px;width:17px;height:17px;border-radius:50%;background:#2789e8;border:3px solid #1454a5}
-.bodykitty{position:absolute;z-index:2;bottom:0;left:37px;width:146px;height:112px;background:linear-gradient(135deg,#82d0ff,#287bd6);border-radius:45% 45% 28% 28%;border:3px solid #1766bd;box-shadow:inset -5px -6px 10px #1454a555}
+.bodykitty{position:absolute;z-index:2;bottom:0;left:37px;width:146px;height:112px;background:linear-gradient(135deg,#82d0ff,#287bd6);border-radius:45% 45% 28% 28%;border:3px solid #1766bd}
 .collar{position:absolute;top:-3px;left:27px;width:86px;height:25px;background:white;border-radius:0 0 50% 50%}
 .buttondot{position:absolute;top:47px;left:65px;width:14px;height:14px;background:#ffdb70;border-radius:50%}
 .arm{position:absolute;z-index:3;bottom:34px;width:42px;height:65px;background:linear-gradient(130deg,#fff,#e8e3ed);border-radius:28px}
@@ -58,8 +58,8 @@ button:active{transform:translateY(3px);box-shadow:0 1px #4b96ce}
 .panel{background:#ffffffdf;border:2px solid #c9e5ff;border-radius:22px;padding:14px;margin:12px 0}
 .panel h2{margin:0 0 9px;color:#397fbd;font-size:19px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.game{background:#f2f9ff;border:1px solid #c8e4ff;border-radius:16px;padding:10px;text-align:center}
-.game b{display:block;margin:3px}
+.game{background:#ffffffdf;border:2px solid #b5e4ff;border-radius:16px;padding:12px;text-align:center;box-shadow:0 4px 8px #5489ad30}
+.game b{display:block;margin:5px}
 .hidden{display:none!important}
 .row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
 #cards{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:390px;margin:10px auto}
@@ -68,16 +68,20 @@ button:active{transform:translateY(3px);box-shadow:0 1px #4b96ce}
 .status{text-align:center;font-weight:bold;color:#397fbd}
 input{width:100%;border:2px solid #c5e3fa;border-radius:14px;padding:12px;font-size:16px;margin:6px 0}
 footer{text-align:center;font-size:12px;padding:15px}
-.games-page{position:fixed;inset:0;z-index:20;overflow-y:auto;background:linear-gradient(160deg,#eaf7ff,#f9eaff);padding:14px}
+.games-page{position:fixed;inset:0;z-index:20;overflow-y:auto;padding:14px;background:linear-gradient(#8bd5ff 0%,#dff5ff 62%,#8edb9a 62%,#5fbd78 100%)}
 .games-inner{max-width:650px;margin:auto}
-.games-title{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(120deg,#80cfff,#d7c9ff);padding:12px;border-radius:20px;color:white}
+.games-title{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(120deg,#48a9ee,#8876db);padding:12px;border-radius:20px;color:white}
 .games-title h2{margin:0}
-.games-page .panel{background:#fff}
-#voiceStatus{font-size:13px}
+.games-page .panel{background:#ffffffed}
+.playfield{background:linear-gradient(#a8e2ff,#e8faff 75%,#9bdb9b 75%);border:3px solid white;border-radius:20px;padding:12px;text-align:center;overflow:hidden}
+.gamecanvas{display:block;width:100%;max-width:360px;height:auto;margin:10px auto;background:#a8e2ff;border:2px solid white;border-radius:15px;touch-action:none}
+.controls{display:flex;justify-content:center;gap:12px;margin:12px}
+.controls button{min-width:65px}
 @media(max-width:420px){.room{min-height:410px}.kitty-wrap{transform:translate(-50%,-48%) scale(.87)}.speech{font-size:13px;max-width:45%}.actions button{font-size:13px;padding:11px 4px}}
 </style>
 </head>
 <body>
+
 <header><h1>🎀 HELLO KATTY 🎀</h1>¡Tu amiguita virtual!</header>
 
 <div class="top">
@@ -105,7 +109,7 @@ footer{text-align:center;font-size:12px;padding:15px}
 <section class="actions">
  <button onclick="startListening()">🎤 Escuchar</button>
  <button onclick="eat()">🍰 Comer</button>
- <button onclick="openGames()">🎮 Juegos</button>
+ <button onclick="openGames()">🎮 Patio</button>
  <button onclick="sleep()">😴 Dormir</button>
  <button onclick="care()">💗 Cariño</button>
  <button onclick="dress()">👗 Vestir</button>
@@ -118,65 +122,102 @@ footer{text-align:center;font-size:12px;padding:15px}
 </section>
 </main>
 
-<!-- PANTALLA INDEPENDIENTE DE JUEGOS -->
+<!-- PATIO DE JUEGOS -->
 <section class="games-page hidden" id="gamesPage">
- <div class="games-inner">
-  <div class="games-title">
-   <h2>🎮 Mundo de juegos</h2>
-   <button class="secondary" onclick="hideGames()">🏠 Volver</button>
-  </div>
+<div class="games-inner">
 
-  <section class="panel" id="gameMenu">
-   <h2>🌸 ¡Elige un juego!</h2>
-   <div class="grid">
-    <div class="game">🧠<b>Memoria</b><button onclick="showGame('memory')">Jugar</button></div>
-    <div class="game">👗<b>Vestir a Katty</b><button onclick="showGame('dressGame')">Jugar</button></div>
-    <div class="game">🧁<b>Pastelería</b><button onclick="showGame('bakery')">Jugar</button></div>
-    <div class="game">💖<b>Preguntas</b><button onclick="showGame('quiz')">Jugar</button></div>
-   </div>
-  </section>
-
-  <section class="panel hidden" id="memory">
-   <h2>🧠 Encuentra las parejas</h2><div id="cards"></div>
-   <p id="memoryMsg" class="status">¡Encuentra las cuatro parejas!</p>
-   <div class="row"><button onclick="newMemory()">Reiniciar</button><button class="secondary" onclick="backToMenu()">Volver a juegos</button></div>
-  </section>
-
-  <section class="panel hidden" id="dressGame">
-   <h2>👗 Cambia el estilo de Katty</h2><div id="outfit">🐱🎀</div>
-   <div class="row">
-    <button onclick="changeOutfit('🎀')">Moño</button>
-    <button onclick="changeOutfit('👑')">Corona</button>
-    <button onclick="changeOutfit('🌸')">Flores</button>
-    <button onclick="changeOutfit('🕶️')">Lentes</button>
-   </div>
-   <p id="dressMsg" class="status">¡Qué bonita!</p>
-   <button class="secondary" onclick="backToMenu()">Volver a juegos</button>
-  </section>
-
-  <section class="panel hidden" id="bakery">
-   <h2>🧁 Pastelería</h2><div id="cake">🧁</div>
-   <div class="row">
-    <button onclick="decorate('🍓')">Fresa</button>
-    <button onclick="decorate('🍒')">Cereza</button>
-    <button onclick="decorate('🍫')">Chocolate</button>
-    <button onclick="decorate('✨')">Brillos</button>
-   </div>
-   <p id="bakeryMsg" class="status">¡Decora tu pastel!</p>
-   <button class="secondary" onclick="backToMenu()">Volver a juegos</button>
-  </section>
-
-  <section class="panel hidden" id="quiz">
-   <h2>💖 Pregunta divertida</h2>
-   <p>¿Qué dulce le gusta a Katty?</p>
-   <div class="row">
-    <button onclick="answerQuiz(true)">🧁 Pastelitos</button>
-    <button onclick="answerQuiz(false)">🥦 Brócoli</button>
-   </div>
-   <p id="quizMsg" class="status"></p>
-   <button class="secondary" onclick="backToMenu()">Volver a juegos</button>
-  </section>
+ <div class="games-title">
+  <h2>🌈 Patio de Katty</h2>
+  <button class="secondary" onclick="hideGames()">🏠 Casa</button>
  </div>
+
+ <section class="panel" id="gameMenu">
+  <h2>☀️ ¡Bienvenida al patio!</h2>
+  <p style="text-align:center">¡Vamos a divertirnos con Katty!</p>
+  <div class="grid">
+   <div class="game">🧠<b>Memoria</b><button onclick="showGame('memory')">Jugar</button></div>
+   <div class="game">👗<b>Vestir a Katty</b><button onclick="showGame('dressGame')">Jugar</button></div>
+   <div class="game">🧁<b>Pastelería</b><button onclick="showGame('bakery')">Jugar</button></div>
+   <div class="game">💖<b>Preguntas</b><button onclick="showGame('quiz')">Jugar</button></div>
+   <div class="game">☁️<b>Brincar entre nubes</b><button onclick="showGame('cloudGame')">Jugar</button></div>
+   <div class="game">🏃<b>Correr y brincar</b><button onclick="showGame('runGame')">Jugar</button></div>
+  </div>
+ </section>
+
+ <section class="panel hidden" id="memory">
+  <h2>🧠 Encuentra las parejas</h2><div id="cards"></div>
+  <p id="memoryMsg" class="status">¡Encuentra las cuatro parejas!</p>
+  <div class="row"><button onclick="newMemory()">Reiniciar</button><button class="secondary" onclick="backToMenu()">Patio</button></div>
+ </section>
+
+ <section class="panel hidden" id="dressGame">
+  <h2>👗 Cambia el estilo de Katty</h2>
+  <div id="outfit">🐱🎀</div>
+  <div class="row">
+   <button onclick="changeOutfit('🎀')">Moño</button>
+   <button onclick="changeOutfit('👑')">Corona</button>
+   <button onclick="changeOutfit('🌸')">Flores</button>
+   <button onclick="changeOutfit('🕶️')">Lentes</button>
+   <button onclick="changeOutfit('👗')">Vestido</button>
+   <button onclick="changeOutfit('🦋')">Mariposa</button>
+  </div>
+  <p id="dressMsg" class="status">¡Vamos a cambiar su look!</p>
+  <button class="secondary" onclick="backToMenu()">Volver al patio</button>
+ </section>
+
+ <section class="panel hidden" id="bakery">
+  <h2>🧁 Pastelería</h2><div id="cake">🧁</div>
+  <div class="row">
+   <button onclick="decorate('🍓')">Fresa</button>
+   <button onclick="decorate('🍒')">Cereza</button>
+   <button onclick="decorate('🍫')">Chocolate</button>
+   <button onclick="decorate('✨')">Brillos</button>
+  </div>
+  <p id="bakeryMsg" class="status">¡Decora tu pastel!</p>
+  <button class="secondary" onclick="backToMenu()">Volver al patio</button>
+ </section>
+
+ <section class="panel hidden" id="quiz">
+  <h2>💖 Pregunta divertida</h2>
+  <p>¿Qué dulce le gusta a Katty?</p>
+  <div class="row">
+   <button onclick="answerQuiz(true)">🧁 Pastelitos</button>
+   <button onclick="answerQuiz(false)">🥦 Brócoli</button>
+  </div>
+  <p id="quizMsg" class="status"></p>
+  <button class="secondary" onclick="backToMenu()">Volver al patio</button>
+ </section>
+
+ <section class="panel hidden" id="cloudGame">
+  <h2>☁️ ¡Brinca entre las nubes!</h2>
+  <div class="playfield">
+   <p>Muévete a los lados y salta sobre las nubes.</p>
+   <canvas id="cloudCanvas" class="gamecanvas" width="320" height="400"></canvas>
+   <p id="cloudScore" class="status">⭐ Puntos: 0</p>
+   <div class="controls">
+    <button onpointerdown="setCloudMove(-1)" onpointerup="setCloudMove(0)" onpointerleave="setCloudMove(0)" onpointercancel="setCloudMove(0)">⬅️</button>
+    <button onpointerdown="setCloudMove(1)" onpointerup="setCloudMove(0)" onpointerleave="setCloudMove(0)" onpointercancel="setCloudMove(0)">➡️</button>
+   </div>
+   <button onclick="startCloud()">🔄 Reiniciar</button>
+  </div>
+  <button class="secondary" onclick="backToMenu()">Volver al patio</button>
+ </section>
+
+ <section class="panel hidden" id="runGame">
+  <h2>🏃 ¡Corre, Katty, corre!</h2>
+  <div class="playfield">
+   <p>Salta los obstáculos y recoge estrellas.</p>
+   <canvas id="runCanvas" class="gamecanvas" width="320" height="200"></canvas>
+   <p id="runScore" class="status">⭐ Puntos: 0</p>
+   <div class="controls">
+    <button onclick="startRun()">▶️ Empezar</button>
+    <button onpointerdown="jumpRun()">⬆️ SALTAR</button>
+   </div>
+  </div>
+  <button class="secondary" onclick="backToMenu()">Volver al patio</button>
+ </section>
+
+</div>
 </section>
 
 <footer>Hello Katty · Tu mascota virtual 💙</footer>
@@ -186,6 +227,7 @@ let coins=Number(localStorage.getItem('katyCoins')||0);
 let happiness=Number(localStorage.getItem('katyHappy')||75);
 let flipped=[],matched=0,lock=false,recognition=null;
 let sleeping=false;
+
 function $(id){return document.getElementById(id)}
 
 function refresh(){
@@ -203,57 +245,34 @@ function speak(t){
   KatyAndroid.speak(t);
   return;
  }
- if('speechSynthesis' in window){
+ if('speechSynthesis'in window){
   speechSynthesis.cancel();
   let u=new SpeechSynthesisUtterance(t);
-  u.lang='es-MX';
-  u.pitch=1.8;
-  u.rate=1.08;
+  u.lang='es-MX';u.pitch=1.8;u.rate=1.08;
   speechSynthesis.speak(u);
  }
 }
 
 function meow(){
- let sounds=['Miaaaaaauuuu','Miau miau','Mrrrrrr... miauuu','Pr r r r r...'];
- let sound=sounds[Math.floor(Math.random()*sounds.length)];
- speak(sound);
+ let sounds=['Miaaaaaauuuu','Miau miau','Mrrrrrr... miauuu','Prrrrrr...'];
+ speak(sounds[Math.floor(Math.random()*sounds.length)]);
 }
-
 function petKaty(){
  let k=$('kitty');
  k.classList.remove('petted');
  void k.offsetWidth;
  k.classList.add('petted');
- meow();
- mood(3);
- earn(1);
+ meow();mood(3);earn(1);
  setTimeout(()=>k.classList.remove('petted'),650);
 }
-
-function eat(){
- speak('Miauuu... ¡qué rico! ¡Gracias!');
- earn(1);mood(8);
-}
-function play(){
- openGames();
-}
+function eat(){speak('Miauuu... ¡qué rico! ¡Gracias!');earn(1);mood(8)}
+function care(){petKaty()}
+function dress(){openGames();showGame('dressGame')}
 function sleep(){
  let k=$('kitty');
  sleeping=!sleeping;
- if(sleeping){
-  k.classList.add('sleeping');
-  speak('Miauuu... buenas noches. Zzz...');
- }else{
-  k.classList.remove('sleeping');
-  speak('¡Miauuu! ¡Ya desperté!');
- }
-}
-function care(){
- petKaty();
-}
-function dress(){
- openGames();
- showGame('dressGame');
+ if(sleeping){k.classList.add('sleeping');speak('Miauuu... buenas noches. Zzz...')}
+ else{k.classList.remove('sleeping');speak('¡Miauuu! ¡Ya desperté!')}
 }
 
 function sendChat(){
@@ -263,74 +282,55 @@ function sendChat(){
  speak('¡Hola! Me dijiste: '+v);
  mood(1);
 }
-
 function repeatWhatIHeard(t){
  if(!t)return;
  $('chat').value=t;
- $('speech').textContent=t;
  $('voiceStatus').textContent='¡Te escuché! Estoy repitiendo tus palabras.';
- speak(t);
- mood(2);
+ speak(t);mood(2);
 }
-
 function startListening(){
  if(window.KatyAndroid&&KatyAndroid.listen){
   $('voiceStatus').textContent='🎤 Te estoy escuchando…';
-  KatyAndroid.listen();
-  return;
+  KatyAndroid.listen();return;
  }
  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){
-  $('voiceStatus').textContent='El reconocimiento de voz no está disponible aquí.';
-  return;
- }
+ if(!SR){$('voiceStatus').textContent='El reconocimiento de voz no está disponible aquí.';return}
  try{
   if(recognition)recognition.stop();
   recognition=new SR();
   recognition.lang='es-MX';
   recognition.interimResults=false;
   recognition.maxAlternatives=1;
-  recognition.onresult=e=>{
-   let words=e.results[0][0].transcript;
-   repeatWhatIHeard(words);
-  };
-  recognition.onerror=()=>{
-   $('voiceStatus').textContent='No pude escucharte. Inténtalo otra vez.';
-  };
-  recognition.onend=()=>{
-   if($('voiceStatus').textContent==='🎤 Te estoy escuchando…'){
-    $('voiceStatus').textContent='Pulsa el micrófono para hablar otra vez.';
-   }
-  };
+  recognition.onresult=e=>repeatWhatIHeard(e.results[0][0].transcript);
+  recognition.onerror=()=>{$('voiceStatus').textContent='No pude escucharte. Inténtalo otra vez.'};
   recognition.start();
   $('voiceStatus').textContent='🎤 Te estoy escuchando…';
- }catch(e){
-  $('voiceStatus').textContent='No pude iniciar el micrófono.';
- }
+ }catch(e){$('voiceStatus').textContent='No pude iniciar el micrófono.'}
 }
-
-function onAndroidSpeech(t){
- repeatWhatIHeard(t);
-}
-function onAndroidSpeechError(t){
- $('voiceStatus').textContent=t;
-}
+function onAndroidSpeech(t){repeatWhatIHeard(t)}
+function onAndroidSpeechError(t){$('voiceStatus').textContent=t}
 
 function openGames(){
+ stopMiniGames();
  $('gamesPage').classList.remove('hidden');
  backToMenu();
 }
 function showGame(id){
+ stopMiniGames();
  $('gameMenu').classList.add('hidden');
- ['memory','dressGame','bakery','quiz'].forEach(x=>$(x).classList.add('hidden'));
+ ['memory','dressGame','bakery','quiz','cloudGame','runGame'].forEach(x=>$(x).classList.add('hidden'));
  $(id).classList.remove('hidden');
  if(id==='memory')newMemory();
+ if(id==='cloudGame')startCloud();
+ if(id==='runGame')drawRunner();
 }
 function backToMenu(){
- ['memory','dressGame','bakery','quiz'].forEach(x=>$(x).classList.add('hidden'));
+ stopMiniGames();
+ ['memory','dressGame','bakery','quiz','cloudGame','runGame'].forEach(x=>$(x).classList.add('hidden'));
  $('gameMenu').classList.remove('hidden');
 }
 function hideGames(){
+ stopMiniGames();
  $('gamesPage').classList.add('hidden');
  backToMenu();
 }
@@ -342,25 +342,21 @@ function newMemory(){
  $('cards').innerHTML='';
  a.forEach(v=>{
   let b=document.createElement('button');
-  b.className='card';
-  b.textContent='❔';
-  b.dataset.value=v;
+  b.className='card';b.textContent='❔';b.dataset.value=v;
   b.onclick=()=>flip(b);
   $('cards').appendChild(b);
  });
 }
 function flip(b){
  if(lock||b.textContent!=='❔')return;
- b.textContent=b.dataset.value;
- flipped.push(b);
+ b.textContent=b.dataset.value;flipped.push(b);
  if(flipped.length===2){
   lock=true;
   if(flipped[0].dataset.value===flipped[1].dataset.value){
    matched++;flipped=[];lock=false;
    if(matched===4){
     $('memoryMsg').textContent='¡Ganaste! +10 monedas 🎉';
-    earn(10);mood(8);
-    speak('¡Miauuu! ¡Ganaste! Eres genial.');
+    earn(10);mood(8);speak('¡Miauuu! ¡Ganaste!');
    }
   }else{
    setTimeout(()=>{
@@ -382,12 +378,199 @@ function decorate(x){
 }
 function answerQuiz(ok){
  $('quizMsg').textContent=ok?'¡Correcto! +5 monedas':'¡Inténtalo otra vez!';
- if(ok){
-  earn(5);mood(5);
-  speak('¡Sííí! ¡Me encantan los pastelitos!');
- }else{
-  speak('Miauuu... ¡inténtalo otra vez!');
+ if(ok){earn(5);mood(5);speak('¡Sííí! ¡Me encantan los pastelitos!')}
+ else speak('Miauuu... ¡inténtalo otra vez!');
+}
+
+/* JUEGO DE BRINCAR ENTRE NUBES */
+let cloudActive=false,cloudFrame=null;
+let cloudX=145,cloudY=300,cloudVy=0,cloudMove=0;
+let cloudPlatforms=[],cloudPoints=0,cloudCamera=0;
+
+function stopMiniGames(){
+ cloudActive=false;runActive=false;
+ if(cloudFrame)cancelAnimationFrame(cloudFrame);
+ if(runFrame)cancelAnimationFrame(runFrame);
+ cloudMove=0;
+}
+
+function setCloudMove(v){cloudMove=v}
+
+function startCloud(){
+ stopMiniGames();
+ const c=$('cloudCanvas'),ctx=c.getContext('2d');
+ cloudX=145;cloudY=300;cloudVy=-7;
+ cloudPoints=0;cloudCamera=0;
+ cloudPlatforms=[
+  {x:115,y:345,w:90},
+  {x:35,y:275,w:75},
+  {x:190,y:205,w:75},
+  {x:75,y:135,w:75},
+  {x:210,y:65,w:75}
+ ];
+ cloudActive=true;
+ $('cloudScore').textContent='⭐ Puntos: 0';
+
+ function frame(){
+  if(!cloudActive)return;
+  ctx.clearRect(0,0,320,400);
+
+  let sky=ctx.createLinearGradient(0,0,0,400);
+  sky.addColorStop(0,'#78ceff');
+  sky.addColorStop(1,'#e8faff');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,320,400);
+
+  ctx.fillStyle='#fff';
+  [[35,55],[240,105],[80,210],[275,290]].forEach(([x,y])=>{
+   ctx.beginPath();
+   ctx.arc(x,y,17,0,Math.PI*2);
+   ctx.arc(x+18,y-8,20,0,Math.PI*2);
+   ctx.arc(x+38,y,16,0,Math.PI*2);
+   ctx.fill();
+  });
+
+  cloudX+=cloudMove*3;
+  cloudX=Math.max(0,Math.min(285,cloudX));
+
+  let oldY=cloudY;
+  cloudVy+=.28;
+  cloudY+=cloudVy;
+
+  if(cloudVy>0){
+   for(let p of cloudPlatforms){
+    if(oldY+5<=p.y && cloudY+5>=p.y &&
+       cloudX+25>p.x && cloudX+5<p.x+p.w){
+     cloudY=p.y-30;
+     cloudVy=-8;
+     cloudPoints++;
+     $('cloudScore').textContent='⭐ Puntos: '+cloudPoints;
+     if(cloudPoints%5===0)earn(2);
+     break;
+    }
+   }
+  }
+
+  if(cloudY<150){
+   let shift=150-cloudY;
+   cloudY=150;
+   cloudCamera+=shift;
+   cloudPlatforms.forEach(p=>p.y+=shift);
+  }
+
+  cloudPlatforms.forEach(p=>{
+   ctx.fillStyle='#fff';
+   ctx.beginPath();
+   ctx.ellipse(p.x+p.w/2,p.y+5,p.w/2,10,0,0,Math.PI*2);
+   ctx.fill();
+   ctx.fillStyle='#c9efff';
+   ctx.fillRect(p.x+12,p.y+5,p.w-24,5);
+  });
+
+  ctx.font='38px sans-serif';
+  ctx.fillText('🐱',cloudX,cloudY+20);
+  ctx.font='19px sans-serif';
+  ctx.fillText('🎀',cloudX+24,cloudY-8);
+
+  if(cloudY>410){
+   cloudActive=false;
+   ctx.fillStyle='#713858';
+   ctx.font='bold 22px sans-serif';
+   ctx.fillText('¡Se cayó Katty!',75,190);
+   ctx.font='16px sans-serif';
+   ctx.fillText('Toca Reiniciar para jugar otra vez',35,220);
+   speak('¡Miauuu! ¡Vamos a intentarlo otra vez!');
+   return;
+  }
+
+  cloudFrame=requestAnimationFrame(frame);
  }
+ frame();
+}
+
+/* JUEGO DE CORRER Y SALTAR */
+let runActive=false,runFrame=null;
+let runnerY=135,runnerVy=0,runnerJump=false;
+let obstacleX=330,runnerPoints=0,starX=230;
+
+function drawRunner(){
+ const c=$('runCanvas'),ctx=c.getContext('2d');
+ ctx.clearRect(0,0,320,200);
+ let sky=ctx.createLinearGradient(0,0,0,200);
+ sky.addColorStop(0,'#79ceff');
+ sky.addColorStop(1,'#e9faff');
+ ctx.fillStyle=sky;ctx.fillRect(0,0,320,200);
+
+ ctx.fillStyle='#fff';
+ ctx.beginPath();ctx.arc(55,35,15,0,7);ctx.arc(73,28,19,0,7);ctx.arc(94,36,15,0,7);ctx.fill();
+
+ ctx.fillStyle='#75c77d';ctx.fillRect(0,165,320,35);
+ ctx.fillStyle='#4eac65';ctx.fillRect(0,165,320,5);
+
+ ctx.font='34px sans-serif';
+ ctx.fillText('🐱',35,runnerY+25);
+ ctx.font='24px sans-serif';
+ ctx.fillText('🌵',obstacleX,164);
+ ctx.fillText('⭐',starX,100);
+}
+
+function startRun(){
+ stopMiniGames();
+ runnerY=135;runnerVy=0;runnerJump=false;
+ obstacleX=330;starX=220;runnerPoints=0;
+ runActive=true;
+ $('runScore').textContent='⭐ Puntos: 0';
+
+ function frame(){
+  if(!runActive)return;
+  let oldY=runnerY;
+  runnerVy+=.55;
+  runnerY+=runnerVy;
+
+  if(runnerY>135){
+   runnerY=135;runnerVy=0;runnerJump=false;
+  }
+
+  obstacleX-=4;
+  starX-=4;
+
+  if(obstacleX<-30){
+   obstacleX=350;
+  }
+
+  if(starX<-20){
+   starX=350+Math.random()*100;
+  }
+
+  if(starX<65&&starX>15&&runnerY<115){
+   runnerPoints++;
+   starX=-40;
+   $('runScore').textContent='⭐ Puntos: '+runnerPoints;
+   earn(2);
+  }
+
+  if(obstacleX<65&&obstacleX>15&&runnerY>105){
+   runActive=false;
+   drawRunner();
+   const ctx=$('runCanvas').getContext('2d');
+   ctx.fillStyle='#713858';
+   ctx.font='bold 22px sans-serif';
+   ctx.fillText('¡Fin del juego!',85,90);
+   ctx.font='15px sans-serif';
+   ctx.fillText('Pulsa Empezar para repetir',55,115);
+   speak('¡Miauuu! ¡Inténtalo otra vez!');
+   return;
+  }
+
+  drawRunner();
+  runFrame=requestAnimationFrame(frame);
+ }
+ frame();
+}
+
+function jumpRun(){
+ if(!runActive||runnerJump)return;
+ runnerVy=-10;
+ runnerJump=true;
 }
 
 $('chat').addEventListener('keydown',e=>{
