@@ -27,8 +27,39 @@ public class MainActivity extends Activity {
     private static final int REQ_AUDIO = 41;
 
     @Override
-    public void onCreate(Bundle b) {
-        super.onCreate(b);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // ==========================
+        // WEBVIEW
+        // ==========================
+        web = new WebView(this);
+
+        WebSettings settings = web.getSettings();
+
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+
+        // Permitir que el HTML local funcione correctamente
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+
+        settings.setMediaPlaybackRequiresUserGesture(false);
+
+        web.setWebViewClient(new WebViewClient());
+        web.setWebChromeClient(new WebChromeClient());
+
+        // Conectar Java con JavaScript
+        web.addJavascriptInterface(new KatyBridge(), "KatyAndroid");
+
+        setContentView(web);
+
+        // ==========================
+        // CARGAR HELLO KATTY
+        // ==========================
+        web.loadUrl("file:///android_asset/index.html");
 
         // ==========================
         // VOZ DE KATTY
@@ -37,16 +68,13 @@ public class MainActivity extends Activity {
 
             if (status == TextToSpeech.SUCCESS) {
 
-                Locale mexico = new Locale("es", "MX");
+                int result =
+                        tts.setLanguage(new Locale("es", "MX"));
 
-                int result = tts.setLanguage(mexico);
-
-                // Voz aguda y rápida tipo ardillita
+                // Voz tipo ardillita
                 tts.setPitch(1.75f);
                 tts.setSpeechRate(1.12f);
 
-                // Si no existe español de México,
-                // usamos español de España.
                 if (result == TextToSpeech.LANG_MISSING_DATA ||
                     result == TextToSpeech.LANG_NOT_SUPPORTED) {
 
@@ -54,29 +82,10 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
-        // ==========================
-        // WEBVIEW
-        // ==========================
-        web = new WebView(this);
-
-        WebSettings s = web.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setMediaPlaybackRequiresUserGesture(false);
-
-        web.addJavascriptInterface(new KatyBridge(), "KatyAndroid");
-
-        web.setWebViewClient(new WebViewClient());
-        web.setWebChromeClient(new WebChromeClient());
-
-        setContentView(web);
-
-        web.loadUrl("file:///android_asset/index.html");
     }
 
     // ==========================
-    // PUENTE ENTRE HTML Y ANDROID
+    // PUENTE JAVA ↔ JAVASCRIPT
     // ==========================
     private class KatyBridge {
 
@@ -85,28 +94,37 @@ public class MainActivity extends Activity {
 
             runOnUiThread(() -> {
 
-                if (tts == null ||
-                    text == null ||
-                    text.trim().isEmpty()) {
+                if (tts == null) {
                     return;
                 }
 
-                String frase = limpiarTexto(text);
+                if (text == null) {
+                    return;
+                }
 
-                // Katty dice la frase completa
-                // con voz aguda tipo ardillita.
+                String frase = text.trim();
+
+                if (frase.isEmpty()) {
+                    return;
+                }
+
+                frase = limpiarTexto(frase);
+
                 tts.speak(
                         frase,
                         TextToSpeech.QUEUE_FLUSH,
                         null,
-                        "KATTY_VOICE"
+                        "KATTY"
                 );
             });
         }
 
         @JavascriptInterface
         public void listen() {
-            runOnUiThread(() -> beginListening());
+
+            runOnUiThread(() -> {
+                beginListening();
+            });
         }
     }
 
@@ -115,14 +133,10 @@ public class MainActivity extends Activity {
     // ==========================
     private String limpiarTexto(String texto) {
 
-        String t = texto.trim();
+        String t = texto;
 
-        // Quitar espacios repetidos
         t = t.replaceAll("\\s+", " ");
 
-        // Cambiar algunos símbolos que pueden
-        // confundir al motor de voz.
-        t = t.replace("…", ".");
         t = t.replace("🎀", "");
         t = t.replace("💙", "");
         t = t.replace("💗", "");
@@ -140,7 +154,7 @@ public class MainActivity extends Activity {
     }
 
     // ==========================
-    // RECONOCIMIENTO DE VOZ
+    // ESCUCHAR AL USUARIO
     // ==========================
     private void beginListening() {
 
@@ -148,7 +162,9 @@ public class MainActivity extends Activity {
                 != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissions(
-                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    new String[]{
+                            Manifest.permission.RECORD_AUDIO
+                    },
                     REQ_AUDIO
             );
 
@@ -158,7 +174,7 @@ public class MainActivity extends Activity {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
 
             jsError(
-                    "El reconocimiento de voz no está disponible en este teléfono."
+                    "El reconocimiento de voz no está disponible."
             );
 
             return;
@@ -168,9 +184,11 @@ public class MainActivity extends Activity {
             recognizer.destroy();
         }
 
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        recognizer =
+                SpeechRecognizer.createSpeechRecognizer(this);
 
-        recognizer.setRecognitionListener(new RecognitionListener() {
+        recognizer.setRecognitionListener(
+                new RecognitionListener() {
 
             @Override
             public void onReadyForSpeech(Bundle params) {
@@ -208,18 +226,20 @@ public class MainActivity extends Activity {
                                 SpeechRecognizer.RESULTS_RECOGNITION
                         );
 
-                if (lista != null && !lista.isEmpty()) {
+                if (lista != null &&
+                    !lista.isEmpty()) {
 
                     String texto = lista.get(0);
 
-                    // Mandamos la frase completa
-                    // al JavaScript de Katty.
                     web.post(() -> {
 
-                        web.evaluateJavascript(
+                        String js =
                                 "onAndroidSpeech(" +
                                 org.json.JSONObject.quote(texto) +
-                                ")",
+                                ")";
+
+                        web.evaluateJavascript(
+                                js,
                                 null
                         );
                     });
@@ -227,7 +247,7 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onPartialResults(Bundle partialResults) {
+            public void onPartialResults(Bundle results) {
             }
 
             @Override
@@ -237,11 +257,10 @@ public class MainActivity extends Activity {
             }
         });
 
-        // ==========================
-        // CONFIGURACIÓN DEL ESCUCHAR
-        // ==========================
         Intent intent =
-                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                new Intent(
+                        RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+                );
 
         intent.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -267,22 +286,26 @@ public class MainActivity extends Activity {
     }
 
     // ==========================
-    // ERROR DE VOZ
+    // ERROR
     // ==========================
     private void jsError(String mensaje) {
 
-        if (web != null) {
-
-            web.post(() -> {
-
-                web.evaluateJavascript(
-                        "onAndroidSpeechError(" +
-                        org.json.JSONObject.quote(mensaje) +
-                        ")",
-                        null
-                );
-            });
+        if (web == null) {
+            return;
         }
+
+        web.post(() -> {
+
+            String js =
+                    "onAndroidSpeechError(" +
+                    org.json.JSONObject.quote(mensaje) +
+                    ")";
+
+            web.evaluateJavascript(
+                    js,
+                    null
+            );
+        });
     }
 
     // ==========================
@@ -311,17 +334,17 @@ public class MainActivity extends Activity {
             } else {
 
                 jsError(
-                        "Necesito permiso de micrófono para escucharte."
+                        "Necesito permiso de micrófono."
                 );
             }
         }
     }
 
     // ==========================
-    // CERRAR LA APP
+    // CERRAR
     // ==========================
     @Override
-    public void onDestroy() {
+    protected void onDestroy() {
 
         if (recognizer != null) {
             recognizer.destroy();
