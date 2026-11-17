@@ -42,8 +42,8 @@ public class MainActivity extends Activity {
                 int result = tts.setLanguage(mexico);
 
                 // Voz más aguda y juguetona
-                tts.setPitch(1.35f);
-                tts.setSpeechRate(0.95f);
+                tts.setPitch(1.75f);
+tts.setSpeechRate(1.12f);
 
                 // Si el teléfono no tiene español de México,
                 // intentamos español general.
