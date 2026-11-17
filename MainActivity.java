@@ -41,12 +41,12 @@ public class MainActivity extends Activity {
 
                 int result = tts.setLanguage(mexico);
 
-                // Voz más aguda y juguetona
+                // Voz aguda y rápida tipo ardillita
                 tts.setPitch(1.75f);
-tts.setSpeechRate(1.12f);
+                tts.setSpeechRate(1.12f);
 
-                // Si el teléfono no tiene español de México,
-                // intentamos español general.
+                // Si no existe español de México,
+                // usamos español de España.
                 if (result == TextToSpeech.LANG_MISSING_DATA ||
                     result == TextToSpeech.LANG_NOT_SUPPORTED) {
 
@@ -85,14 +85,16 @@ tts.setSpeechRate(1.12f);
 
             runOnUiThread(() -> {
 
-                if (tts == null || text == null || text.trim().isEmpty()) {
+                if (tts == null ||
+                    text == null ||
+                    text.trim().isEmpty()) {
                     return;
                 }
 
                 String frase = limpiarTexto(text);
 
-                // IMPORTANTE:
-                // Enviamos la frase completa al TTS.
+                // Katty dice la frase completa
+                // con voz aguda tipo ardillita.
                 tts.speak(
                         frase,
                         TextToSpeech.QUEUE_FLUSH,
@@ -109,17 +111,17 @@ tts.setSpeechRate(1.12f);
     }
 
     // ==========================
-    // LIMPIAR TEXTO PARA LA VOZ
+    // LIMPIAR TEXTO
     // ==========================
     private String limpiarTexto(String texto) {
 
         String t = texto.trim();
 
-        // Evita problemas con espacios repetidos
+        // Quitar espacios repetidos
         t = t.replaceAll("\\s+", " ");
 
-        // Evita que algunos símbolos hagan
-        // que el motor pronuncie cosas extrañas.
+        // Cambiar algunos símbolos que pueden
+        // confundir al motor de voz.
         t = t.replace("…", ".");
         t = t.replace("🎀", "");
         t = t.replace("💙", "");
@@ -129,7 +131,10 @@ tts.setSpeechRate(1.12f);
         t = t.replace("🍰", "");
         t = t.replace("🎮", "");
         t = t.replace("😴", "");
-        t = t.replace("💗", "");
+        t = t.replace("🍓", "");
+        t = t.replace("🌸", "");
+        t = t.replace("🧁", "");
+        t = t.replace("✨", "");
 
         return t.trim();
     }
@@ -207,6 +212,8 @@ tts.setSpeechRate(1.12f);
 
                     String texto = lista.get(0);
 
+                    // Mandamos la frase completa
+                    // al JavaScript de Katty.
                     web.post(() -> {
 
                         web.evaluateJavascript(
@@ -224,10 +231,15 @@ tts.setSpeechRate(1.12f);
             }
 
             @Override
-            public void onEvent(int eventType, Bundle params) {
+            public void onEvent(
+                    int eventType,
+                    Bundle params) {
             }
         });
 
+        // ==========================
+        // CONFIGURACIÓN DEL ESCUCHAR
+        // ==========================
         Intent intent =
                 new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
@@ -274,4 +286,75 @@ tts.setSpeechRate(1.12f);
     }
 
     // ==========================
-    // PERMISO DEL MICRÓF
+    // PERMISO DEL MICRÓFONO
+    // ==========================
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String[] permissions,
+            int[] grantResults) {
+
+        super.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+        );
+
+        if (requestCode == REQ_AUDIO) {
+
+            if (grantResults.length > 0 &&
+                grantResults[0] ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+                beginListening();
+
+            } else {
+
+                jsError(
+                        "Necesito permiso de micrófono para escucharte."
+                );
+            }
+        }
+    }
+
+    // ==========================
+    // CERRAR LA APP
+    // ==========================
+    @Override
+    public void onDestroy() {
+
+        if (recognizer != null) {
+            recognizer.destroy();
+            recognizer = null;
+        }
+
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+            tts = null;
+        }
+
+        if (web != null) {
+            web.destroy();
+            web = null;
+        }
+
+        super.onDestroy();
+    }
+
+    // ==========================
+    // BOTÓN ATRÁS
+    // ==========================
+    @Override
+    public void onBackPressed() {
+
+        if (web != null && web.canGoBack()) {
+
+            web.goBack();
+
+        } else {
+
+            super.onBackPressed();
+        }
+    }
+}
