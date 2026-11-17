@@ -1,0 +1,86 @@
+
+name: Crear APK Hello Katy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar proyecto Android
+        run: |
+          mkdir -p build-apk/app/src/main/java/com/hellokaty
+          mkdir -p build-apk/app/src/main/assets
+
+          cp MainActivity.java build-apk/app/src/main/java/com/hellokaty/
+          cp AndroidManifest.xml build-apk/app/src/main/
+          cp index.html build-apk/app/src/main/assets/
+
+          cat > build-apk/settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "HelloKaty"
+          include ':app'
+          EOF
+
+          echo "plugins { id 'com.android.application' version '8.7.3' apply false }" > build-apk/build.gradle
+
+          cat > build-apk/app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.hellokaty'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.hellokaty'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+      - name: Compilar APK
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Construir aplicación
+        working-directory: build-apk
+        run: gradle assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hello-Katy-APK
+          path: build-apk/app/build/outputs/apk/debug/app-debug.apk
