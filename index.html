@@ -240,10 +240,30 @@ function earn(n){coins+=n;refresh()}
 function mood(n){happiness=Math.max(0,Math.min(100,happiness+n));refresh()}
 
 function speak(t){
- $('speech').textContent=t;
- if(window.KatyAndroid&&KatyAndroid.speak){
-  KatyAndroid.speak(t);
-  return;
+  if(!t)return;
+
+  t=String(t).trim();
+
+  $('speech').textContent=t;
+
+  if(window.KatyAndroid&&KatyAndroid.speak){
+    KatyAndroid.speak(t);
+    return;
+  }
+
+  if('speechSynthesis'in window){
+    speechSynthesis.cancel();
+
+    let u=new SpeechSynthesisUtterance(t);
+    u.lang='es-MX';
+
+    // Voz tipo ardillita
+    u.pitch=1.8;
+    u.rate=1.12;
+
+    speechSynthesis.speak(u);
+  }
+ }
  }
  if('speechSynthesis'in window){
   speechSynthesis.cancel();
