@@ -1,91 +1,271 @@
+
 <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="theme-color" content="#ffb7d5">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffacd1">
 <title>Hello Katy</title>
-<link rel="manifest" href="manifest.webmanifest">
 <style>
-:root{--pink:#ffb7d5;--deep:#d94f91;--cream:#fff8fc;--lav:#e9dcff;--ink:#613c57}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#fff1f8,#f7edff);font-family:system-ui,-apple-system,sans-serif;color:var(--ink)}
-header{padding:20px 16px 14px;text-align:center;background:linear-gradient(135deg,#ffb7d5,#e9dcff);border-radius:0 0 28px 28px}
-h1{margin:0;font-size:2rem;letter-spacing:2px;color:#fff;text-shadow:0 2px 5px #c86c9b}
-header p{margin:5px 0 0;color:#713f60}
-main{max-width:760px;margin:auto;padding:14px}
-.panel{background:#ffffffd9;border:2px solid #ffe0ee;border-radius:22px;padding:15px;margin:12px 0;box-shadow:0 5px 18px #d98ab322}
-.hero{text-align:center}.kitty{font-size:76px;line-height:1.25}.bubble{background:#fff0f7;border-radius:18px;padding:12px;margin:8px auto;max-width:500px;min-height:48px}
-button{border:0;border-radius:16px;padding:12px 15px;margin:5px;background:var(--deep);color:white;font-weight:700;font-size:1rem;box-shadow:0 3px 0 #a63c70;cursor:pointer}
-button.secondary{background:#9b78c8;box-shadow:0 3px 0 #72549a}button.soft{background:#ffe0ee;color:#8d3e69;box-shadow:0 3px 0 #e7b5cd}
-button:active{transform:translateY(2px);box-shadow:none}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.game{background:#fff5fa;border:1px solid #ffd8e9;border-radius:18px;padding:12px;text-align:center}
-.game .emoji{font-size:36px}.game h3{margin:4px 0}
-.hidden{display:none}.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:5px}
-#cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:430px;margin:12px auto}
-.card{font-size:27px;min-height:64px;background:#f1e8ff;color:#654a82;box-shadow:0 3px 0 #c8b4e7}
-#outfit{font-size:60px;text-align:center;padding:10px}
-#cake{font-size:62px;text-align:center;padding:10px}
-small{color:#8b6b80}.status{font-weight:700;color:#9a4d78}
-input{border:2px solid #f2c5dc;border-radius:14px;padding:12px;width:min(100%,420px);font-size:1rem}
-footer{text-align:center;padding:18px;color:#98758b;font-size:.85rem}
+:root{--pink:#ffacd1;--hot:#ed4d9b;--dark:#713858}
+*{box-sizing:border-box}
+body{margin:0;color:var(--dark);font-family:system-ui,sans-serif;background:radial-gradient(circle,#fff,#ffe9f4 60%,#f5eaff);min-height:100vh}
+header{text-align:center;padding:15px;background:linear-gradient(120deg,#ff9fca,#e9c9ff);border-radius:0 0 25px 25px}
+h1{margin:0;color:white;font-size:35px;text-shadow:0 3px #d84e91}
+.top{display:flex;gap:10px;margin:12px auto;padding:0 12px;max-width:700px;font-weight:bold}
+.meter,.coins{background:white;border:2px solid #ffc5df;border-radius:25px;padding:9px;flex:1}
+.bar{height:9px;background:#f4d5e7;border-radius:20px;margin-top:5px}
+.bar i{display:block;height:100%;width:75%;background:#ed4d9b;border-radius:20px}
+main{max-width:700px;margin:auto;padding:0 12px 25px}
+.room{position:relative;overflow:hidden;min-height:420px;border:3px solid #ffd1e5;border-radius:28px;background:linear-gradient(#ffd7e9 0 62%,#e9c5ee 62% 68%,#d99fc8 68%)}
+.window{position:absolute;left:6%;top:8%;width:23%;height:28%;border:8px solid #fff0f8;border-radius:15px;background:linear-gradient(#aee7ff,#b8e7ad)}
+.bed{position:absolute;right:3%;bottom:17%;width:34%;height:28%;background:#ffb9d8;border:7px solid #f18ab9;border-radius:35px 35px 15px 15px}
+.bed:before{content:"";position:absolute;inset:20% 8%;background:#ffe8f3;border-radius:12px}
+.rug{position:absolute;bottom:2%;left:13%;width:74%;height:25%;background:#f58fc1;border:8px solid #ffcbe2;border-radius:50%}
+.speech{position:absolute;z-index:5;right:3%;top:6%;max-width:47%;background:white;border:3px solid #f47bb4;border-radius:22px;padding:12px;text-align:center;font-weight:bold}
+.kitty-wrap{position:absolute;z-index:2;left:50%;top:51%;transform:translate(-50%,-50%);width:245px;height:330px;display:flex;align-items:flex-end;justify-content:center}
+.kitty{position:relative;width:220px;height:300px;transform-origin:50% 90%;animation:bob 2.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+.ear{position:absolute;top:5px;width:82px;height:95px;background:linear-gradient(145deg,#fff,#e9e5ed);border-radius:22px 60px 12px 35px}
+.ear.left{left:7px;transform:rotate(-25deg)}
+.ear.right{right:7px;transform:scaleX(-1) rotate(-25deg)}
+.head{position:absolute;z-index:1;top:35px;width:220px;height:185px;background:linear-gradient(145deg,#fff,#e5e0e9);border-radius:48% 48% 43% 43%;box-shadow:inset -8px -8px 15px #dcd7e3}
+.eye{position:absolute;top:117px;width:13px;height:21px;background:#28212a;border-radius:50%;z-index:3}
+.eye.left{left:61px}.eye.right{right:61px}
+.nose{position:absolute;z-index:3;top:147px;left:103px;width:15px;height:11px;background:#f3c32c;border-radius:50%}
+.whisker{position:absolute;z-index:3;top:150px;width:37px;height:2px;background:#39313a}
+.w1{left:-7px;transform:rotate(12deg)}.w2{left:-9px;top:165px}.w3{left:-5px;top:180px;transform:rotate(-12deg)}
+.w4{right:-7px;transform:rotate(-12deg)}.w5{right:-9px;top:165px}.w6{right:-5px;top:180px;transform:rotate(12deg)}
+.bow{position:absolute;z-index:4;top:26px;right:26px;width:66px;height:43px}
+.bow:before,.bow:after{content:"";position:absolute;top:0;width:34px;height:38px;background:linear-gradient(135deg,#ff75b7,#dc287f);border:3px solid #c72d77;border-radius:75% 25% 65% 35%}
+.bow:before{left:0;transform:rotate(25deg)}.bow:after{right:0;transform:scaleX(-1) rotate(25deg)}
+.knot{position:absolute;z-index:5;left:27px;top:13px;width:17px;height:17px;border-radius:50%;background:#f84c9d;border:3px solid #c72d77}
+.bodykitty{position:absolute;z-index:2;bottom:0;left:37px;width:146px;height:112px;background:linear-gradient(120deg,#ff80b9,#ec3f91);border-radius:45% 45% 28% 28%;border:3px solid #e64c91}
+.collar{position:absolute;top:-3px;left:27px;width:86px;height:25px;background:white;border-radius:0 0 50% 50%}
+.buttondot{position:absolute;top:47px;left:65px;width:14px;height:14px;background:white;border-radius:50%}
+.arm{position:absolute;z-index:3;bottom:34px;width:42px;height:65px;background:linear-gradient(130deg,#fff,#e8e3ed);border-radius:28px}
+.arm.left{left:19px;transform:rotate(30deg)}.arm.right{right:18px;transform:rotate(-25deg)}
+.legs{position:absolute;bottom:-3px;left:49px;width:53px;height:40px;border-radius:50%;background:#fff;box-shadow:55px 0 0 -1px #f6f3f8}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:13px 0}
+button{border:0;border-radius:17px;padding:12px 7px;background:linear-gradient(#ffb6d8,#f36ba9);color:#672d50;font-size:15px;font-weight:850;box-shadow:0 4px #cf4e8b;cursor:pointer}
+button:active{transform:translateY(3px);box-shadow:0 1px #cf4e8b}
+.secondary{background:linear-gradient(#e8d7ff,#c6a5ed);box-shadow:0 4px #9876c3}
+.panel{background:#ffffffdf;border:2px solid #ffd5e7;border-radius:22px;padding:14px;margin:12px 0}
+.panel h2{margin:0 0 9px;color:#b43f7a;font-size:19px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.game{background:#fff4fa;border:1px solid #ffd2e5;border-radius:16px;padding:10px;text-align:center}
+.game b{display:block;margin:3px}
+.hidden{display:none!important}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+#cards{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:390px;margin:10px auto}
+.card{font-size:24px;min-height:55px;padding:5px;background:#eadcff;box-shadow:0 3px #b99ad9}
+#outfit,#cake{font-size:52px;text-align:center;padding:8px}
+.status{text-align:center;font-weight:bold;color:#9d4775}
+input{width:100%;border:2px solid #f4c4db;border-radius:14px;padding:12px;font-size:16px;margin:6px 0}
+footer{text-align:center;font-size:12px;padding:15px}
+@media(max-width:420px){.room{min-height:410px}.kitty-wrap{transform:translate(-50%,-48%) scale(.87)}.speech{font-size:13px;max-width:45%}.actions button{font-size:13px;padding:11px 4px}}
 </style>
 </head>
 <body>
-<header><h1>🎀 HELLO KATY 🎀</h1><p>Un mundo dulce de juegos y amistad</p></header>
+<header><h1>🎀 HELLO KATY 🎀</h1>¡Tu amiguita virtual!</header>
+<div class="top">
+<div class="meter">💗 Felicidad<div class="bar"><i id="happyBar"></i></div></div>
+<div class="coins">⭐ <span id="coins">0</span></div>
+</div>
 <main>
-<section class="panel hero">
- <div class="kitty" aria-label="gatita de fantasía">🐱🎀</div>
- <div class="bubble" id="speech">¡Hola, amiguita! Soy Katy. ¿Jugamos?</div>
- <div class="row">
-  <button onclick="sayHello()">💗 Hablar con Katy</button>
-  <button class="secondary" onclick="startListening()">🎤 Hablar por micrófono</button>
- </div>
- <small id="voiceStatus">La voz y el micrófono dependen del navegador y de sus permisos.</small>
- <p><input id="chatInput" placeholder="Escribe algo para Katy…" autocomplete="off"><button onclick="sendChat()">Enviar</button></p>
+<section class="room">
+<div class="window"></div><div class="bed"></div><div class="rug"></div>
+<div class="speech" id="speech">¡Hola! Soy Hello Katy 💗</div>
+<div class="kitty-wrap"><div class="kitty" id="kitty">
+<div class="ear left"></div><div class="ear right"></div><div class="head"></div>
+<div class="eye left"></div><div class="eye right"></div><div class="nose"></div>
+<i class="whisker w1"></i><i class="whisker w2"></i><i class="whisker w3"></i><i class="whisker w4"></i><i class="whisker w5"></i><i class="whisker w6"></i>
+<div class="bow"></div><div class="knot"></div>
+<div class="bodykitty"><div class="collar"></div><div class="buttondot"></div></div>
+<div class="arm left"></div><div class="arm right"></div><div class="legs"></div>
+</div></div>
 </section>
-
+<section class="actions">
+<button onclick="startListening()">🎤 Hablar</button>
+<button onclick="eat()">🍰 Comer</button>
+<button onclick="play()">🎮 Jugar</button>
+<button onclick="sleep()">😴 Dormir</button>
+<button onclick="care()">💗 Cariño</button>
+<button onclick="dress()">👗 Vestir</button>
+</section>
 <section class="panel">
- <h2>🌸 Elige un minijuego</h2>
- <div class="grid">
-  <div class="game"><div class="emoji">🧠</div><h3>Memoria</h3><p>Encuentra las parejas.</p><button onclick="showGame('memory')">Jugar</button></div>
-  <div class="game"><div class="emoji">👗</div><h3>Viste a Katy</h3><p>Elige su estilo.</p><button onclick="showGame('dress')">Jugar</button></div>
-  <div class="game"><div class="emoji">🧁</div><h3>Pastelería</h3><p>Decora un pastelito.</p><button onclick="showGame('bakery')">Jugar</button></div>
-  <div class="game"><div class="emoji">💖</div><h3>Preguntas</h3><p>Conoce a Katy.</p><button onclick="showGame('quiz')">Jugar</button></div>
- </div>
- <p class="status" id="coins">⭐ Monedas: 0</p>
+<h2>💬 Habla con Katy</h2>
+<div class="row"><input id="chat" placeholder="Escribe algo para Katy…"><button onclick="sendChat()">Enviar</button></div>
+<p id="voiceStatus" class="status">También puedes usar el micrófono.</p>
 </section>
-
+<section class="panel">
+<h2>🌸 Minijuegos</h2>
+<div class="grid">
+<div class="game">🧠<b>Memoria</b><button onclick="showGame('memory')">Jugar</button></div>
+<div class="game">👗<b>Vestir a Katy</b><button onclick="showGame('dressGame')">Jugar</button></div>
+<div class="game">🧁<b>Pastelería</b><button onclick="showGame('bakery')">Jugar</button></div>
+<div class="game">💖<b>Preguntas</b><button onclick="showGame('quiz')">Jugar</button></div>
+</div>
+</section>
 <section class="panel hidden" id="memory">
- <h2>🧠 Juego de memoria</h2><p>Encuentra las cuatro parejas.</p><div id="cards"></div><p id="memoryMsg" class="status">¡Tú puedes!</p><button class="soft" onclick="newMemory()">Reiniciar</button><button class="secondary" onclick="hideGames()">Volver</button>
+<h2>🧠 Encuentra las parejas</h2><div id="cards"></div>
+<p id="memoryMsg" class="status">¡Encuentra las cuatro parejas!</p>
+<div class="row"><button onclick="newMemory()">Reiniciar</button><button class="secondary" onclick="hideGames()">Volver</button></div>
 </section>
-<section class="panel hidden" id="dress">
- <h2>👗 Viste a Katy</h2><div id="outfit">🐱🎀</div><p class="row"><button onclick="changeOutfit('🎀')">Moño rosa</button><button onclick="changeOutfit('👑')">Corona</button><button onclick="changeOutfit('🌸')">Flores</button><button onclick="changeOutfit('🕶️')">Lentes</button></p><p id="dressMsg" class="status">¡Qué bonita!</p><button class="secondary" onclick="hideGames()">Volver</button>
+<section class="panel hidden" id="dressGame">
+<h2>👗 Cambia el estilo de Katy</h2><div id="outfit">🐱🎀</div>
+<div class="row">
+<button onclick="changeOutfit('🎀')">Moño</button>
+<button onclick="changeOutfit('👑')">Corona</button>
+<button onclick="changeOutfit('🌸')">Flores</button>
+<button onclick="changeOutfit('🕶️')">Lentes</button>
+</div>
+<p id="dressMsg" class="status">¡Qué bonita!</p>
+<button class="secondary" onclick="hideGames()">Volver</button>
 </section>
 <section class="panel hidden" id="bakery">
- <h2>🧁 Pastelería</h2><div id="cake">🧁</div><p class="row"><button onclick="decorate('🍓')">Fresa</button><button onclick="decorate('🍒')">Cereza</button><button onclick="decorate('🍫')">Chocolate</button><button onclick="decorate('✨')">Brillitos</button></p><p id="bakeryMsg" class="status">¡Decora tu pastel!</p><button class="secondary" onclick="hideGames()">Volver</button>
+<h2>🧁 Pastelería</h2><div id="cake">🧁</div>
+<div class="row">
+<button onclick="decorate('🍓')">Fresa</button>
+<button onclick="decorate('🍒')">Cereza</button>
+<button onclick="decorate('🍫')">Chocolate</button>
+<button onclick="decorate('✨')">Brillos</button>
+</div>
+<p id="bakeryMsg" class="status">¡Decora tu pastel!</p>
+<button class="secondary" onclick="hideGames()">Volver</button>
 </section>
 <section class="panel hidden" id="quiz">
- <h2>💖 Pregunta divertida</h2><p id="question">¿Qué le gusta a Katy?</p><div class="row"><button onclick="answerQuiz('pasteles')">🧁 Pasteles</button><button onclick="answerQuiz('lluvia')">🌧️ Lluvia</button><button onclick="answerQuiz('basura')">🗑️ Basura</button></div><p id="quizMsg" class="status"></p><button class="secondary" onclick="hideGames()">Volver</button>
+<h2>💖 Pregunta divertida</h2>
+<p>¿Qué dulce le gusta a Katy?</p>
+<div class="row">
+<button onclick="answerQuiz(true)">🧁 Pastelitos</button>
+<button onclick="answerQuiz(false)">🥦 Brócoli</button>
+</div>
+<p id="quizMsg" class="status"></p>
+<button class="secondary" onclick="hideGames()">Volver</button>
 </section>
 </main>
-<footer>Primera versión de Hello Katy · Juego de prueba no oficial</footer>
+<footer>Hello Katy · Mascota virtual</footer>
 <script>
-let coins=0, flipped=[], matched=0, lock=false, recognition=null, outfit='🎀';
-const $=id=>document.getElementById(id);
-function speak(text){$('speech').textContent=text; if(window.KatyAndroid && KatyAndroid.speak){KatyAndroid.speak(text);return} if('speechSynthesis' in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='es-MX';u.rate=.92;u.pitch=1.35;speechSynthesis.speak(u)}}
-function onAndroidSpeech(text){$('chatInput').value=text;sendChat();$('voiceStatus').textContent='¡Te escuché!'}
-function onAndroidSpeechError(msg){$('voiceStatus').textContent=msg}
-function sayHello(){speak('¡Hola, amiguita! Soy Katy. Me encanta jugar contigo. ¿Qué hacemos hoy?')}
-function sendChat(){let v=$('chatInput').value.trim();if(!v)return;$('chatInput').value='';let t=v.toLowerCase();let r=t.includes('hola')?'¡Holaaaa! ¡Qué alegría verte!':t.includes('jugar')?'¡Sííí! Elige uno de nuestros minijuegos.':t.includes('como estas')||t.includes('cómo estás')?'¡Estoy feliz de estar contigo!':t.includes('gracias')?'¡De nada, amiguita! ¡Te mando un abrazo!':t.includes('nombre')?'Me llamo Katy. ¡Mucho gusto!':'¡Qué interesante! Cuéntame más, amiguita.';speak(r)}
-function startListening(){if(window.KatyAndroid && KatyAndroid.listen){$('voiceStatus').textContent='Te estoy escuchando…';KatyAndroid.listen();return}let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('voiceStatus').textContent='Este navegador no ofrece reconocimiento de voz. Prueba Chrome actualizado.';return}try{recognition=new SR();recognition.lang='es-MX';recognition.interimResults=false;$('voiceStatus').textContent='Te estoy escuchando…';recognition.onresult=e=>{$('chatInput').value=e.results[0][0].transcript;sendChat();$('voiceStatus').textContent='¡Te escuché!'};recognition.onerror=e=>$('voiceStatus').textContent='No pude escucharte: '+e.error;recognition.onend=()=>{};recognition.start()}catch(e){$('voiceStatus').textContent='Permite el acceso al micrófono e inténtalo otra vez.'}}
-function updateCoins(n){coins+=n;$('coins').textContent='⭐ Monedas: '+coins}
-function showGame(id){hideGames();$(id).classList.remove('hidden');if(id==='memory')newMemory()}
-function hideGames(){['memory','dress','bakery','quiz'].forEach(x=>$(x).classList.add('hidden'))}
-function newMemory(){let a=['🍓','🌸','🎀','🧁','🍓','🌸','🎀','🧁'].sort(()=>Math.random()-.5);flipped=[];matched=0;lock=false;$('memoryMsg').textContent='Encuentra las parejas.';$('cards').innerHTML='';a.forEach((v,i)=>{let b=document.createElement('button');b.className='card';b.textContent='❔';b.dataset.value=v;b.onclick=()=>flip(b);$('cards').appendChild(b)})}
-function flip(b){if(lock||b.textContent!=='❔')return;b.textContent=b.dataset.value;flipped.push(b);if(flipped.length===2){lock=true;if(flipped[0].dataset.value===flipped[1].dataset.value){matched++;flipped=[];lock=false;if(matched===4){$('memoryMsg').textContent='¡Ganaste! +10 monedas 🎉';updateCoins(10);speak('¡Lo lograste! ¡Eres genial!')}}else setTimeout(()=>{flipped.forEach(x=>x.textContent='❔');flipped=[];lock=false},750)}}
-function changeOutfit(x){outfit=x;$('outfit').textContent='🐱'+x;$('dressMsg').textContent='¡Katy se ve preciosa!';updateCoins(1);speak('¡Me encanta mi nuevo look!')}
-function decorate(x){$('cake').textContent='🧁'+x;$('bakeryMsg').textContent='¡Qué delicioso quedó! +1 moneda';updateCoins(1);speak('¡Mmm! ¡Qué rico pastelito!')}
-function answerQuiz(v){if(v==='pasteles'){$('quizMsg').textContent='¡Correcto! +5 monedas';updateCoins(5);speak('¡Sí! ¡Me encantan los pastelitos!')}else{$('quizMsg').textContent='¡Inténtalo otra vez!';speak('Casi, amiguita. ¡Inténtalo otra vez!')}}
+let coins=Number(localStorage.getItem('katyCoins')||0);
+let happiness=Number(localStorage.getItem('katyHappy')||75);
+let flipped=[],matched=0,lock=false,recognition=null;
+function $(id){return document.getElementById(id)}
+function refresh(){
+$('coins').textContent=coins;
+$('happyBar').style.width=happiness+'%';
+localStorage.setItem('katyCoins',coins);
+localStorage.setItem('katyHappy',happiness);
+}
+function earn(n){coins+=n;refresh()}
+function mood(n){happiness=Math.max(0,Math.min(100,happiness+n));refresh()}
+function speak(t){
+$('speech').textContent=t;
+if(window.KatyAndroid&&KatyAndroid.speak){KatyAndroid.speak(t);return}
+if('speechSynthesis'in window){
+speechSynthesis.cancel();
+let u=new SpeechSynthesisUtterance(t);
+u.lang='es-MX';u.pitch=1.25;u.rate=.92;
+speechSynthesis.speak(u);
+}
+}
+function talk(){speak('¡Holaaaa! Soy Hello Katy. ¡Me encanta estar contigo! ¿Jugamos?');mood(2)}
+function eat(){speak('¡Mmm, qué rico pastelito! ¡Muchas gracias!');earn(1);mood(8)}
+function play(){speak('¡Siiii! ¡Vamos a jugar juntas!');mood(10);showGame('memory')}
+function sleep(){
+let k=$('kitty');
+if(k.style.animation==='none'){
+k.style.animation='bob 2.5s ease-in-out infinite';
+speak('¡Ya desperté! ¡Buenos días!');
+}else{
+k.style.animation='none';
+speak('Tengo sueñito. Voy a dormir. Buenas noches.');
+}
+}
+function care(){speak('¡Awww! ¡Me encanta que me acaricies! Te quiero mucho.');mood(12);earn(1)}
+function dress(){showGame('dressGame');speak('¡Vamos a escoger un look precioso!')}
+function sendChat(){
+let v=$('chat').value.trim();if(!v)return;
+$('chat').value='';
+let t=v.toLowerCase(),r;
+if(t.includes('hola'))r='¡Holaaaa! ¡Qué alegría verte!';
+else if(t.includes('jugar'))r='¡Sííí! ¡Vamos a jugar!';
+else if(t.includes('cómo estás')||t.includes('como estas'))r='¡Estoy muy feliz contigo!';
+else if(t.includes('te quiero'))r='¡Yo también te quiero mucho!';
+else if(t.includes('nombre'))r='Soy Hello Katy, tu amiguita virtual.';
+else r='¡Qué interesante! Cuéntame más, amiguita.';
+speak(r);mood(1);
+}
+function startListening(){
+if(window.KatyAndroid&&KatyAndroid.listen){
+$('voiceStatus').textContent='Te estoy escuchando…';
+KatyAndroid.listen();return;
+}
+let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$('voiceStatus').textContent='El reconocimiento de voz no está disponible aquí.';return}
+try{
+recognition=new SR();recognition.lang='es-MX';recognition.interimResults=false;
+recognition.onresult=e=>{$('chat').value=e.results[0][0].transcript;sendChat();$('voiceStatus').textContent='¡Te escuché!'};
+recognition.onerror=()=>{$('voiceStatus').textContent='No pude escucharte. Inténtalo otra vez.'};
+recognition.start();$('voiceStatus').textContent='Te estoy escuchando…';
+}catch(e){$('voiceStatus').textContent='No pude iniciar el micrófono.'}
+}
+function onAndroidSpeech(t){$('chat').value=t;sendChat();$('voiceStatus').textContent='¡Te escuché!'}
+function onAndroidSpeechError(t){$('voiceStatus').textContent=t}
+function showGame(id){
+hideGames();$(id).classList.remove('hidden');
+if(id==='memory')newMemory();
+}
+function hideGames(){
+['memory','dressGame','bakery','quiz'].forEach(id=>$(id).classList.add('hidden'));
+}
+function newMemory(){
+let a=['🍓','🌸','🎀','🧁','🍓','🌸','🎀','🧁'].sort(()=>Math.random()-.5);
+flipped=[];matched=0;lock=false;
+$('memoryMsg').textContent='¡Encuentra las cuatro parejas!';
+$('cards').innerHTML='';
+a.forEach(v=>{
+let b=document.createElement('button');
+b.className='card';b.textContent='❔';b.dataset.value=v;
+b.onclick=()=>flip(b);$('cards').appendChild(b);
+});
+}
+function flip(b){
+if(lock||b.textContent!=='❔')return;
+b.textContent=b.dataset.value;flipped.push(b);
+if(flipped.length===2){
+lock=true;
+if(flipped[0].dataset.value===flipped[1].dataset.value){
+matched++;flipped=[];lock=false;
+if(matched===4){
+$('memoryMsg').textContent='¡Ganaste! +10 monedas 🎉';
+earn(10);mood(8);speak('¡Lo lograste! ¡Eres genial!');
+}
+}else{
+setTimeout(()=>{
+flipped.forEach(x=>x.textContent='❔');
+flipped=[];lock=false;
+},700);
+}
+}
+}
+function changeOutfit(x){
+$('outfit').textContent='🐱'+x;
+$('dressMsg').textContent='¡Katy se ve preciosa!';
+earn(1);speak('¡Me encanta mi nuevo look!');
+}
+function decorate(x){
+$('cake').textContent='🧁'+x;
+$('bakeryMsg').textContent='¡Qué delicioso quedó! +1 moneda';
+earn(1);speak('¡Mmm! ¡Qué rico pastelito!');
+}
+function answerQuiz(ok){
+$('quizMsg').textContent=ok?'¡Correcto! +5 monedas':'¡Inténtalo otra vez!';
+if(ok){earn(5);mood(5);speak('¡Sí! ¡Me encantan los pastelitos!')}
+else speak('Casi, amiguita. ¡Inténtalo otra vez!');
+}
+$('chat').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+refresh();
 </script>
-</body></html>
+</body>
+</html>
