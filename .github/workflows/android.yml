@@ -91,16 +91,15 @@ jobs:
           from pathlib import Path
           p = Path("app/src/main/java/com/rm/mp3tomidi/convert/stages/DemucsStemSeparator.kt")
           s = p.read_text()
-          old = """            setMemoryPatternOptimization(false)
-            setCPUArenaAllocator(false)"""
-          new = """            setMemoryPatternOptimization(false)
-            setCPUArenaAllocator(false)
-            // Limita los hilos nativos para evitar picos de RAM en teléfonos.
-            setIntraOpNumThreads(2)
-            setInterOpNumThreads(1)"""
-          if old not in s:
-              raise SystemExit("No se encontró el bloque esperado de opciones ONNX; se cancela la compilación.")
-          p.write_text(s.replace(old, new, 1))
+          anchor = "setCPUArenaAllocator(false)"
+          if s.count(anchor) != 1:
+              raise SystemExit(f"Se esperaba una sola opción de memoria ONNX; encontradas: {s.count(anchor)}")
+          addition = """setCPUArenaAllocator(false)
+                      // Limita los hilos nativos para reducir picos de memoria en móviles.
+                      setIntraOpNumThreads(2)
+                      setInterOpNumThreads(1)"""
+          p.write_text(s.replace(anchor, addition, 1))
+          print("Optimización de hilos ONNX aplicada correctamente.")
           PY
 
       - name: Instalar NDK y CMake requeridos
