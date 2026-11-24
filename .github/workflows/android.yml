@@ -12,57 +12,70 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar proyecto
+      - name: Descargar configuración I-A-M
         uses: actions/checkout@v4
+
       - name: Instalar Java 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-      - name: Preparar proyecto Android
+
+      - name: Instalar Android SDK, NDK y CMake
+        uses: android-actions/setup-android@v3
+
+      - name: Descargar motor musical abierto
         run: |
-          mkdir -p build-apk/app/src/main/java/com/iam/musicstudio
-          mkdir -p build-apk/app/src/main/assets
-          mkdir -p build-apk/app/src/main/res/drawable
-          cp MainActivity.java build-apk/app/src/main/java/com/iam/musicstudio/
-          cp AndroidManifest.xml build-apk/app/src/main/
-          cp index.html build-apk/app/src/main/assets/
-          cp ic_launcher.xml build-apk/app/src/main/res/drawable/
-          cat > build-apk/settings.gradle <<'EOF'
-          pluginManagement {
-              repositories { google(); mavenCentral(); gradlePluginPortal() }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories { google(); mavenCentral() }
-          }
-          rootProject.name = "IAMRealMusicStudio"
-          include ':app'
+          git clone https://github.com/roge-rm/MP3toMIDI.git build-apk
+          git -C build-apk checkout 6b86c32ad60641c940e524134bc198d9fac6a205
+          echo "Motor fijado al commit 6b86c32ad60641c940e524134bc198d9fac6a205"
+
+      - name: Aplicar identidad I-A-M
+        run: |
+          sed -i 's/applicationId = "com.rm.mp3tomidi"/applicationId = "com.iam.musicstudio"/' build-apk/app/build.gradle.kts
+          sed -i 's/rootProject.name = "MP3toMIDI"/rootProject.name = "IAMRealMusicStudio"/' build-apk/settings.gradle.kts
+          cat > build-apk/app/src/main/res/values/strings.xml <<'EOF'
+          <resources>
+              <string name="app_name">I-A-M REAL MUSIC STUDIO</string>
+              <string name="choose_input">Elegir canción</string>
+              <string name="input_formats_hint">MP3, WAV, FLAC, AAC, OGG y más</string>
+              <string name="choose_output">Elegir archivo de salida</string>
+              <string name="output_file_name">Nombre del archivo</string>
+              <string name="convert">Analizar y separar pistas</string>
+              <string name="cancel_conversion">Cancelar proceso</string>
+              <string name="cancel_conversion_title">¿Cancelar el proceso?</string>
+              <string name="cancel_conversion_message">Se detendrá el proceso actual. Esta acción no se puede deshacer.</string>
+              <string name="keep_converting">Continuar</string>
+              <string name="play">Reproducir</string>
+              <string name="pause">Pausar</string>
+              <string name="no_file_selected">No hay canción seleccionada</string>
+              <string name="conversion_channel_name">Procesamiento musical</string>
+              <string name="switch_to_play_screen">Abrir reproductor MIDI</string>
+              <string name="switch_to_convert_screen">Volver al estudio</string>
+              <string name="midi_file_section">Archivo MIDI</string>
+              <string name="choose_midi_file">Elegir archivo MIDI</string>
+              <string name="no_midi_file_selected">No hay archivo seleccionado</string>
+              <string name="soundfont_section">Instrumentos virtuales</string>
+              <string name="soundfont_default">Banco de sonidos FluidR3 GM</string>
+              <string name="soundfont_custom">Banco de sonidos propio</string>
+              <string name="load_custom_soundfont">Cargar SoundFont propio</string>
+              <string name="reset_to_default_soundfont">Volver al banco predeterminado</string>
+              <string name="downloading_default_soundfont">Descargando sonidos (%1$d%%)</string>
+              <string name="soundfont_load_failed">No se pudo cargar ese banco de sonidos</string>
+          </resources>
           EOF
-          echo "plugins { id 'com.android.application' version '8.7.3' apply false }" > build-apk/build.gradle
-          cat > build-apk/app/build.gradle <<'EOF'
-          plugins { id 'com.android.application' }
-          android {
-              namespace 'com.iam.musicstudio'
-              compileSdk 35
-              defaultConfig {
-                  applicationId 'com.iam.musicstudio'
-                  minSdk 23
-                  targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
-              }
-          }
-          EOF
-      - name: Configurar Gradle 8.9
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-      - name: Construir APK
+
+      - name: Instalar NDK y CMake requeridos
+        run: |
+          sdkmanager "platforms;android-37" "build-tools;37.0.0" "ndk;27.2.12479018" "cmake;4.1.2"
+
+      - name: Construir aplicación Android
         working-directory: build-apk
-        run: gradle assembleDebug
+        run: ./gradlew --no-daemon assembleDebug
+
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
           name: IAM-REAL-MUSIC-STUDIO-APK
           path: build-apk/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
