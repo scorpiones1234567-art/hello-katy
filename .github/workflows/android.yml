@@ -1,4 +1,4 @@
-name: Construir I-A-M REAL MUSIC STUDIO APK # Pipeline con motor Demucs
+name: Construir I-A-M REAL MUSIC STUDIO APK # Pipeline Demucs y MIDI con dependencias compatibles
 
 on:
   push:
