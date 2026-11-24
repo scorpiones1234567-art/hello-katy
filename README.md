@@ -36,3 +36,5 @@ Consulta `THIRD_PARTY_NOTICES.md` para las licencias y atribuciones.
 Compilación de motor integrada: revisión inicial del workflow Android.
 
 Configuración de Android SDK actualizada para la compilación automatizada.
+
+El flujo de compilación utiliza la plataforma Android estable 36 en el entorno de CI.
