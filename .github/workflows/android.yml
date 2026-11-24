@@ -21,9 +21,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Instalar Android SDK, NDK y CMake
-        uses: android-actions/setup-android@v3
-
       - name: Descargar motor musical abierto
         run: |
           git clone https://github.com/roge-rm/MP3toMIDI.git build-apk
@@ -67,7 +64,8 @@ jobs:
 
       - name: Instalar NDK y CMake requeridos
         run: |
-          sdkmanager "platforms;android-37" "build-tools;37.0.0" "ndk;27.2.12479018" "cmake;4.1.2"
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install "platforms;android-37" "ndk;27.2.12479018" "cmake;4.1.2"
 
       - name: Construir aplicación Android
         working-directory: build-apk
