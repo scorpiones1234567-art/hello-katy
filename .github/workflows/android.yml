@@ -21,6 +21,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Preparar herramientas Android
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
       - name: Descargar motor musical abierto
         run: |
           git clone https://github.com/roge-rm/MP3toMIDI.git build-apk
