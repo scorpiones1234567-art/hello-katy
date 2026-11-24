@@ -1,4 +1,4 @@
-name: Construir I-A-M REAL MUSIC STUDIO APK # Android NDK pipeline
+name: Construir I-A-M REAL MUSIC STUDIO APK # Pipeline con motor Demucs
 
 on:
   push:
