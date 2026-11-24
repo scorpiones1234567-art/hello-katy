@@ -72,6 +72,17 @@ jobs:
         run: |
           sed -i 's/version = release(37)/version = release(36)/' app/build.gradle.kts
           sed -i 's/targetSdk = 37/targetSdk = 36/' app/build.gradle.kts
+          sed -i 's/agp = "9.4.0"/agp = "9.4.0"/' gradle/libs.versions.toml
+          sed -i 's/coreKtx = "1.19.0"/coreKtx = "1.17.0"/' gradle/libs.versions.toml
+          sed -i 's/appcompat = "1.6.1"/appcompat = "1.7.1"/' gradle/libs.versions.toml
+          sed -i 's/material = "1.10.0"/material = "1.13.0"/' gradle/libs.versions.toml
+          sed -i 's/composeBom = "2026.08.00"/composeBom = "2025.10.00"/' gradle/libs.versions.toml
+          sed -i 's/activityCompose = "1.13.0"/activityCompose = "1.11.0"/' gradle/libs.versions.toml
+          sed -i 's/lifecycle = "2.11.0"/lifecycle = "2.9.4"/' gradle/libs.versions.toml
+          sed -i 's/work = "2.11.2"/work = "2.10.5"/' gradle/libs.versions.toml
+          sed -i 's/media3 = "1.11.0"/media3 = "1.8.0"/' gradle/libs.versions.toml
+          sed -i 's/onnxruntime = "1.27.0"/onnxruntime = "1.23.2"/' gradle/libs.versions.toml
+          sed -i 's/oboe = "1.10.0"/oboe = "1.9.3"/' gradle/libs.versions.toml
 
       - name: Instalar NDK y CMake requeridos
         run: |
