@@ -1,6 +1,4 @@
-
-
-name: Crear APK Hello Katy
+name: Construir I-A-M REAL MUSIC STUDIO APK
 
 on:
   push:
@@ -13,60 +11,42 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Descargar proyecto
         uses: actions/checkout@v4
-
-      - name: Instalar Java
+      - name: Instalar Java 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Preparar proyecto Android
         run: |
-          mkdir -p build-apk/app/src/main/java/com/hellokaty
+          mkdir -p build-apk/app/src/main/java/com/iam/musicstudio
           mkdir -p build-apk/app/src/main/assets
           mkdir -p build-apk/app/src/main/res/drawable
-
-          cp MainActivity.java build-apk/app/src/main/java/com/hellokaty/
+          cp MainActivity.java build-apk/app/src/main/java/com/iam/musicstudio/
           cp AndroidManifest.xml build-apk/app/src/main/
           cp index.html build-apk/app/src/main/assets/
           cp ic_launcher.xml build-apk/app/src/main/res/drawable/
-
           cat > build-apk/settings.gradle <<'EOF'
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
-          rootProject.name = "HelloKaty"
+          rootProject.name = "IAMRealMusicStudio"
           include ':app'
           EOF
-
           echo "plugins { id 'com.android.application' version '8.7.3' apply false }" > build-apk/build.gradle
-
           cat > build-apk/app/build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application'
-          }
-
+          plugins { id 'com.android.application' }
           android {
-              namespace 'com.hellokaty'
+              namespace 'com.iam.musicstudio'
               compileSdk 35
-
               defaultConfig {
-                  applicationId 'com.hellokaty'
+                  applicationId 'com.iam.musicstudio'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
@@ -74,18 +54,15 @@ jobs:
               }
           }
           EOF
-
       - name: Configurar Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-
-      - name: Construir aplicación
+      - name: Construir APK
         working-directory: build-apk
         run: gradle assembleDebug
-
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Hello-Katy-APK
+          name: IAM-REAL-MUSIC-STUDIO-APK
           path: build-apk/app/build/outputs/apk/debug/app-debug.apk
