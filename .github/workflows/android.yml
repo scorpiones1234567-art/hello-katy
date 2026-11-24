@@ -84,6 +84,25 @@ jobs:
           sed -i 's/onnxruntime = "1.27.0"/onnxruntime = "1.23.2"/' gradle/libs.versions.toml
           sed -i 's/oboe = "1.10.0"/oboe = "1.9.3"/' gradle/libs.versions.toml
 
+      - name: Optimizar memoria de Demucs para móviles
+        working-directory: build-apk
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("app/src/main/java/com/rm/mp3tomidi/convert/stages/DemucsStemSeparator.kt")
+          s = p.read_text()
+          old = """            setMemoryPatternOptimization(false)
+            setCPUArenaAllocator(false)"""
+          new = """            setMemoryPatternOptimization(false)
+            setCPUArenaAllocator(false)
+            // Limita los hilos nativos para evitar picos de RAM en teléfonos.
+            setIntraOpNumThreads(2)
+            setInterOpNumThreads(1)"""
+          if old not in s:
+              raise SystemExit("No se encontró el bloque esperado de opciones ONNX; se cancela la compilación.")
+          p.write_text(s.replace(old, new, 1))
+          PY
+
       - name: Instalar NDK y CMake requeridos
         run: |
           yes | sdkmanager --licenses >/dev/null
