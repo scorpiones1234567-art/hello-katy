@@ -31,3 +31,6 @@ La voz se conserva como una pista separada dentro del resultado; no se modifica 
 GitHub Actions descarga el proyecto de motor en el commit indicado, aplica el identificador y nombre I-A-M y construye el APK de depuración.
 
 Consulta `THIRD_PARTY_NOTICES.md` para las licencias y atribuciones.
+
+
+Compilación de motor integrada: revisión inicial del workflow Android.
