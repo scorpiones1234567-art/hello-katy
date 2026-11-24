@@ -34,3 +34,5 @@ Consulta `THIRD_PARTY_NOTICES.md` para las licencias y atribuciones.
 
 
 Compilación de motor integrada: revisión inicial del workflow Android.
+
+Configuración de Android SDK actualizada para la compilación automatizada.
