@@ -38,3 +38,5 @@ Compilación de motor integrada: revisión inicial del workflow Android.
 Configuración de Android SDK actualizada para la compilación automatizada.
 
 El flujo de compilación utiliza la plataforma Android estable 36 en el entorno de CI.
+
+Se fijaron versiones compatibles de las bibliotecas Android para el SDK 36.
