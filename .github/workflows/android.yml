@@ -67,6 +67,159 @@ jobs:
           </resources>
           EOF
 
+      - name: Añadir catálogo y prueba de instrumentos virtuales
+        working-directory: build-apk
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("app/src/main/java/com/rm/mp3tomidi/ui/PlayScreen.kt")
+          s = p.read_text()
+
+          def replace_once(old, new, label):
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: se esperaba 1 coincidencia, encontradas {count}")
+              return s.replace(old, new, 1)
+
+          s = replace_once(
+              "import androidx.compose.foundation.layout.Arrangement\n",
+              "import androidx.compose.foundation.layout.Arrangement\nimport androidx.compose.foundation.layout.Box\n",
+              "import Box",
+          )
+          s = replace_once(
+              "import androidx.compose.material3.MaterialTheme\n",
+              "import androidx.compose.material3.DropdownMenu\nimport androidx.compose.material3.DropdownMenuItem\nimport androidx.compose.material3.MaterialTheme\n",
+              "importar menú",
+          )
+          s = replace_once(
+              "import com.rm.mp3tomidi.R\n",
+              "import com.rm.mp3tomidi.R\nimport com.rm.mp3tomidi.audio.SoundEngine\nimport com.rm.mp3tomidi.midi.GmInstrument\n",
+              "importar motor e instrumentos",
+          )
+          s = replace_once(
+              "import kotlinx.coroutines.launch\n",
+              "import kotlinx.coroutines.delay\nimport kotlinx.coroutines.launch\n",
+              "importar delay",
+          )
+          s = replace_once(
+              "    var soundFontDownloadProgress by remember { mutableStateOf<Float?>(null) }\n",
+              "    var soundFontDownloadProgress by remember { mutableStateOf<Float?>(null) }\n    var soundFontReady by remember { mutableStateOf(false) }\n    var selectedInstrument by remember { mutableStateOf(GmInstrument.ACOUSTIC_GRAND_PIANO) }\n    var instrumentMenuExpanded by remember { mutableStateOf(false) }\n",
+              "estado del catálogo",
+          )
+          s = replace_once(
+              "        viewModel.soundEngine.ensureLoaded { fraction -> soundFontDownloadProgress = fraction }\n        soundFontDownloadProgress = null\n",
+              "        viewModel.soundEngine.ensureLoaded { fraction -> soundFontDownloadProgress = fraction }\n        soundFontDownloadProgress = null\n        soundFontReady = true\n",
+              "estado del banco",
+          )
+          ui_anchor = """                    if (usingCustomSoundFont) {
+                        OutlinedActionButton(
+                            text = stringResource(R.string.reset_to_default_soundfont),
+                            icon = Icons.Filled.Refresh,
+                            onClick = {
+                                scope.launch {
+                                    soundFontDownloadProgress = 0f
+                                    viewModel.soundEngine.resetToDefault({ f -> soundFontDownloadProgress = f }) { }
+                                    soundFontDownloadProgress = null
+                                }
+                            },
+                        )
+                    }
+                }
+"""
+          ui_addition = """                    if (usingCustomSoundFont) {
+                        OutlinedActionButton(
+                            text = stringResource(R.string.reset_to_default_soundfont),
+                            icon = Icons.Filled.Refresh,
+                            onClick = {
+                                scope.launch {
+                                    soundFontDownloadProgress = 0f
+                                    viewModel.soundEngine.resetToDefault({ f -> soundFontDownloadProgress = f }) { }
+                                    soundFontDownloadProgress = null
+                                }
+                            },
+                        )
+                    }
+                }
+
+                SectionCard(title = "Catálogo de instrumentos") {
+                    Text(
+                        "Explora los 128 instrumentos General MIDI del banco FluidR3 y escucha una muestra antes de usarlos en tus pistas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Box {
+                        OutlinedActionButton(
+                            text = GmInstrument.NAMES[selectedInstrument],
+                            icon = Icons.Filled.LibraryMusic,
+                            onClick = { instrumentMenuExpanded = true },
+                        )
+                        DropdownMenu(
+                            expanded = instrumentMenuExpanded,
+                            onDismissRequest = { instrumentMenuExpanded = false },
+                        ) {
+                            GmInstrument.NAMES.forEachIndexed { program, name ->
+                                DropdownMenuItem(
+                                    text = { Text(name) },
+                                    onClick = {
+                                        selectedInstrument = program
+                                        instrumentMenuExpanded = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    OutlinedActionButton(
+                        text = "ESCUCHAR INSTRUMENTO",
+                        icon = Icons.Filled.PlayArrow,
+                        enabled = soundFontReady,
+                        onClick = {
+                            scope.launch {
+                                viewModel.soundEngine.noteOn(
+                                    SoundEngine.MELODIC_BANK,
+                                    selectedInstrument,
+                                    60,
+                                    0.85f,
+                                )
+                                delay(700)
+                                viewModel.soundEngine.noteOff(
+                                    SoundEngine.MELODIC_BANK,
+                                    selectedInstrument,
+                                    60,
+                                )
+                            }
+                        },
+                    )
+                    OutlinedActionButton(
+                        text = "PROBAR BATERÍA",
+                        icon = Icons.Filled.PlayArrow,
+                        enabled = soundFontReady,
+                        onClick = {
+                            scope.launch {
+                                val bank = SoundEngine.PERCUSSION_BANK
+                                val hits = listOf(36, 38, 42, 38, 36, 42)
+                                for (note in hits) {
+                                    viewModel.soundEngine.noteOn(bank, 0, note, 0.9f)
+                                    delay(110)
+                                    viewModel.soundEngine.noteOff(bank, 0, note)
+                                    delay(90)
+                                }
+                            }
+                        },
+                    )
+                    Text(
+                        "Los sonidos se cargan desde el banco de muestras FluidR3 GM. La primera descarga requiere Internet; después queda guardado en el teléfono.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+"""
+          if s.count(ui_anchor) != 1:
+              raise SystemExit(f"bloque de SoundFont no encontrado de forma única: {s.count(ui_anchor)}")
+          s = s.replace(ui_anchor, ui_addition, 1)
+          p.write_text(s)
+          print("Catálogo de 128 instrumentos y prueba de batería/piano añadidos.")
+          PY
+
       - name: Adaptar SDK disponible
         working-directory: build-apk
         run: |
