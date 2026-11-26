@@ -7,6 +7,9 @@ Mezclador multipista para Android, con una interfaz web local integrada en una a
 - Importar varios archivos de audio en una sola sesión.
 - Reproducir las pistas sincronizadas desde el inicio.
 - Control individual de volumen, panorama izquierda/derecha y silencio.
+- Cortar cada instrumento en un punto elegido para crear clips separados.
+- Recortar inicio y final de cada clip y moverlo en la mezcla.
+- Cambiar volumen, ecualización, panorama y tono en tiempo real durante la reproducción.
 - Modo SOLO para escuchar una pista aislada.
 - Ecualización individual de graves, medios y agudos.
 - Ajuste individual de tono por semitonos.
@@ -28,7 +31,9 @@ Los archivos originales no se sobrescriben. El procesamiento de audio se realiza
 
 - La exportación de esta primera versión es WAV; MP3 todavía no está incorporado.
 - El control de velocidad cambia también el tono (no es time-stretch independiente).
-- La alineación es manual mediante el control de retraso; no hay detección automática de BPM ni sincronización inteligente.
+- La alineación es manual mediante el control de posición; no hay detección automática de BPM ni sincronización inteligente.
+- Los cortes y cambios de posición se aplican al iniciar de nuevo la reproducción; volumen, ecualización, panorama, tono y tempo responden durante la reproducción.
+- Los cortes crean clips derivados en la sesión; el archivo de audio original permanece intacto.
 - El motor trabaja con los formatos que Android/WebView pueda decodificar.
 - Los proyectos no se guardan todavía como sesiones editables al cerrar la aplicación.
 
