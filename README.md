@@ -4,6 +4,12 @@ Estudio de producción musical multipista para Android (WebView) y navegador com
 
 ## Funciones implementadas en esta versión
 
+- Interfaz rediseñada como consola de audio táctil para usar el celular en horizontal; la APK solicita orientación horizontal.
+- Canales tipo hardware con faders verticales y perillas giratorias táctiles para graves, medios, agudos y panorama.
+- Espectrómetro gráfico central conectado al analizador de audio real del master (frecuencias en tiempo real, no una animación decorativa).
+- Acceso rápido desde la consola a importar audio, agregar instrumento, automatizar, guardar y exportar.
+- Control master general.
+
 - Importar varias pistas de audio y verlas en una línea de tiempo multipista.
 - Reproducir y detener la mezcla sincronizada.
 - Consola con volumen, panorama, graves, medios y agudos por pista.
