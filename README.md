@@ -10,6 +10,8 @@ Estudio de producción musical multipista para Android (WebView) y navegador com
 - Acceso rápido desde la consola a importar audio, agregar instrumento, automatizar, guardar y exportar.
 - Control master general.
 
+- Biblioteca musical que abre el selector de archivos del celular para elegir canciones y pistas de audio.
+- Reproductor de referencia independiente de la consola, con lista de pistas importadas y controles propios; el master exportado también queda cargado para escucharlo.
 - Importar varias pistas de audio y verlas en una línea de tiempo multipista.
 - Reproducir y detener la mezcla sincronizada.
 - Consola con volumen, panorama, graves, medios y agudos por pista.
@@ -19,7 +21,8 @@ Estudio de producción musical multipista para Android (WebView) y navegador com
 - Eventos de notas internos al tocar el teclado con la grabación armada y la reproducción activa.
 - Control de tempo (BPM), loop y zoom de línea de tiempo.
 - Guardar sesión .iam y restaurar la última sesión local del dispositivo mediante IndexedDB/localStorage.
-- Exportar mezcla WAV estéreo.
+- Exportar mezcla WAV estéreo sin pérdida: PCM de 24 bits o flotante de 32 bits, a 48 kHz o 96 kHz.
+- Revisión del master final en el reproductor independiente.
 - Procesamiento local; no se envían las canciones a un servidor.
 
 ## Uso rápido
@@ -29,7 +32,9 @@ Estudio de producción musical multipista para Android (WebView) y navegador com
 3. Activa Grabar automatización y mueve los faders o la ecualización mientras suena.
 4. Detén la grabación; los movimientos quedan asociados al segundo en que los hiciste.
 5. Agrega un instrumento virtual, selecciona su sonido y toca las teclas en pantalla.
-6. Guarda el proyecto y exporta la mezcla WAV.
+6. Usa la biblioteca y su reproductor para escuchar las pistas de referencia sin detener la consola.
+7. En Exportación Master, elige 24-bit PCM para entrega de alta calidad o 32-bit flotante para conservar margen de masterización; selecciona 48 kHz o 96 kHz según el destino.
+8. Exporta el WAV y escúchalo desde el reproductor independiente.
 
 ## Guardado de proyectos
 
@@ -41,6 +46,8 @@ El archivo .iam conserva la estructura de pistas, controles, notas y automatizac
 - Los instrumentos virtuales son sintetizadores básicos; todavía no incluyen bibliotecas de muestras realistas de piano, batería, guitarra o instrumentos acústicos.
 - La grabación de notas del teclado es una secuencia interna simplificada; no es todavía un editor MIDI completo.
 - La automatización registra y aplica movimientos de volumen, panorama y ecualización durante la reproducción y en el render WAV.
+- La biblioteca abre el selector de archivos de Android; por seguridad, el usuario elige los archivos que la app puede leer, no se escanea todo el almacenamiento automáticamente.
+- La exportación a 96 kHz no recupera detalle que no exista en los archivos originales; para la mayoría de entregas musicales, 48 kHz / 24-bit PCM es una opción de alta calidad.
 - No incluye aún grabación de micrófono, plugins VST/AU, separación de stems, time-stretch independiente, cuantización avanzada ni exportación MP3.
 - Los formatos de audio que se pueden importar dependen del decodificador disponible en Android WebView.
 - La cantidad de pistas y duración máxima dependen de la memoria disponible en el dispositivo.
