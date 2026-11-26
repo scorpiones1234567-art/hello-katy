@@ -34,7 +34,7 @@ El archivo .iam conserva la estructura de pistas, controles, notas y automatizac
 - Esta es una primera versión funcional del estudio, no sustituye todavía a una DAW profesional.
 - Los instrumentos virtuales son sintetizadores básicos; todavía no incluyen bibliotecas de muestras realistas de piano, batería, guitarra o instrumentos acústicos.
 - La grabación de notas del teclado es una secuencia interna simplificada; no es todavía un editor MIDI completo.
-- La automatización registra movimientos de volumen, panorama y ecualización. La exportación WAV aplica actualmente automatización de volumen y panorama; se ampliará la reproducción/exportación de curvas de EQ en la siguiente revisión.
+- La automatización registra y aplica movimientos de volumen, panorama y ecualización durante la reproducción y en el render WAV.
 - No incluye aún grabación de micrófono, plugins VST/AU, separación de stems, time-stretch independiente, cuantización avanzada ni exportación MP3.
 - Los formatos de audio que se pueden importar dependen del decodificador disponible en Android WebView.
 - La cantidad de pistas y duración máxima dependen de la memoria disponible en el dispositivo.
