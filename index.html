@@ -178,15 +178,17 @@ $('exportWav').onclick=async()=>{
     g.gain.value=t.gain;p.pan.value=t.pan;lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;
     src.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
     src.start(t.offset,t.sourceStart,t.sourceEnd-t.sourceStart);
-    (t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param)param.setTargetAtTime(ev.value,Math.max(0,t.offset+ev.time),.015)});
+    (t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param)param.setTargetAtTime(ev.value,Math.max(0,ev.time),.015)});
    }else (t.notes||[]).forEach(n=>{
     let o=off.createOscillator(),g=off.createGain();o.type=t.instrument==='organ'?'square':t.instrument==='bass'?'triangle':t.instrument==='strings'?'sawtooth':'sine';
     o.frequency.value=440*Math.pow(2,(n.note-69)/12);g.gain.value=t.gain*.2;o.connect(g);g.connect(m);o.start(t.offset+n.time);o.stop(t.offset+n.time+n.dur+.1);
    });
   });
   let rendered=await off.startRendering(),wav=encodeWav(rendered,depth),url=URL.createObjectURL(new Blob([wav],{type:'audio/wav'})),a=document.createElement('a');
-  a.href=url;a.download='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
-  say('Master WAV exportado: '+rate+' Hz · '+depth+' bits · estéreo · sin pérdida.');
+  a.href=url;a.download='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';a.click();
+  let previous=libraryUrls.get('final');if(previous)URL.revokeObjectURL(previous);libraryUrls.set('final',url);
+  $('libraryAudio').src=url;$('libraryAudio').load();$('libraryNowPlaying').textContent='MASTER FINAL · '+rate+' Hz · '+depth+' bits · pulsa reproducir para revisar la mezcla';
+  say('Master WAV exportado: '+rate+' Hz · '+depth+' bits · estéreo · sin pérdida. Ya está cargado en el reproductor independiente para revisarlo.');
  }catch(e){say('Error al exportar: '+e.message)}
 };
 function encodeWav(b,depth){
