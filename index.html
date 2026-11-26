@@ -52,8 +52,32 @@ body{background:#080910;color:#e8edf6}
  .app{padding:5px 8px 16px}.header{padding:0 2px 5px}.logo{width:35px;height:35px}.brand b{font-size:16px}.transport{padding:5px;gap:5px}.transport button{padding:6px 8px;font-size:10px}.transport .time{font-size:12px}.consolePanel{margin:6px 0;padding:7px}.consoleGrid{grid-template-columns:minmax(180px,28%) minmax(0,1fr);align-items:stretch;gap:7px}.spectrumBox,.spectrumBox canvas{height:145px;min-height:145px}.consoleChannels{overflow-x:auto}.channel{flex-basis:112px;min-width:112px;padding:5px}.knob{width:32px;height:32px}.faderArea{height:105px}.faderTrack{height:96px}.faderTrack input{height:90px}.faderScale{height:96px}
 }
 @media(orientation:portrait){.consoleGrid{grid-template-columns:1fr}.consoleChannels{max-height:none}}
+
+/* BIBLIOTECA MUSICAL Y MONITOR INDEPENDIENTE */
+.libraryPanel{background:linear-gradient(145deg,#202633,#111722);border:1px solid #495365;border-radius:10px;padding:12px;margin:10px 0}
+.libraryGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,360px);gap:12px}
+.libraryList{display:grid;gap:6px;max-height:220px;overflow:auto}
+.libraryItem{display:flex;align-items:center;gap:8px;padding:8px;background:#0c111a;border:1px solid #ffffff18;border-radius:7px;min-width:0}
+.libraryItem .libName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.libraryPlayer{background:linear-gradient(#303747,#171d29);border:1px solid #586477;border-radius:8px;padding:12px}
+.libraryPlayer audio{width:100%;height:38px;margin:8px 0}
+.libraryPlayer .nowPlaying{font-size:11px;color:#f1d99c;overflow-wrap:anywhere;min-height:28px}
+.exportOptions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.exportOptions label{font-size:11px;color:#c2cad8}
+.exportOptions select{background:#111722;color:#fff;border:1px solid #596477;border-radius:6px;padding:8px}
+@media(max-width:760px){.libraryGrid{grid-template-columns:1fr}.libraryList{max-height:180px}}
+
 </style></head><body><div class="app">
 <header class="header"><div class="brand"><div class="logo">I-A-M</div><div><b>I-A-M STUDIO</b><small>ESTUDIO DE PRODUCCIÓN MUSICAL</small></div></div><div class="topactions"><button id="addAudio" class="primary">＋ Importar audio</button><button id="newSynth">＋ Instrumento virtual</button><button id="saveProject">Guardar proyecto</button><button id="loadProject">Abrir proyecto</button><input id="audioFiles" type="file" accept="audio/*" multiple hidden><input id="projectFile" type="file" accept=".iam,.json,application/json" hidden></div></header>
+
+<section class="libraryPanel" id="musicLibrary">
+ <div class="consoleTop"><div><div class="section" style="margin:0">BIBLIOTECA MUSICAL · REPRODUCTOR INDEPENDIENTE</div><div class="hint">Busca música en el almacenamiento del celular y escúchala sin detener la consola.</div></div><button id="libraryBrowse" class="primary">＋ ABRIR BIBLIOTECA DEL CELULAR</button></div>
+ <div class="libraryGrid">
+  <div><div class="libraryList" id="libraryList"><div class="muted">Todavía no has agregado canciones. Pulsa “Abrir biblioteca del celular”.</div></div></div>
+  <div class="libraryPlayer"><div class="section" style="margin:0">REPRODUCTOR DE REFERENCIA</div><div class="nowPlaying" id="libraryNowPlaying">Selecciona una canción de tu biblioteca.</div><audio id="libraryAudio" controls preload="metadata"></audio><div class="small">Este reproductor es independiente: puedes escuchar una referencia mientras preparas la mezcla en la consola.</div></div>
+ </div>
+</section>
+
 <div class="transport"><button id="toStart">|◀</button><button id="play" class="primary">▶ REPRODUCIR</button><button id="stop">■ DETENER</button><button id="loop">↻ LOOP: OFF</button><span class="time" id="clock">00:00.0</span><span class="muted">BPM</span><input id="bpm" type="number" min="40" max="220" value="120" style="width:62px;background:#ffffff10;color:white;border:1px solid var(--line);border-radius:7px;padding:7px"><span class="muted">Compás 4/4</span><span class="grow"></span><span><i class="lamp" id="recLamp"></i><b id="recText">LISTO</b></span><button id="recordAuto" class="hot">● GRABAR AUTOMATIZACIÓN</button></div>
 
 <section class="panel consolePanel" id="liveConsole">
@@ -65,10 +89,10 @@ body{background:#080910;color:#e8edf6}
 <section class="panel"><div class="section">02 · PISTAS Y CONTROLES EN VIVO</div><div class="tracks" id="tracks"><p class="muted">Todavía no hay pistas.</p></div></section>
 <section class="panel"><div class="section">03 · CONSOLA DE MEZCLAS</div><div class="mixer" id="mixer"></div><p class="small">Los faders de esta consola controlan cada pista. Con la grabación de automatización activa, los movimientos quedan registrados en el tiempo.</p></section>
 <section class="panel"><div class="section">04 · INSTRUMENTO VIRTUAL</div><div class="toolbar"><select id="instrument" style="background:#201a35;color:white;border:1px solid var(--line);border-radius:8px;padding:9px"><option value="piano">Piano</option><option value="organ">Órgano</option><option value="bass">Bajo</option><option value="strings">Cuerdas</option><option value="synth">Sintetizador</option><option value="drums">Batería electrónica</option></select><select id="octave" style="background:#201a35;color:white;border:1px solid var(--line);border-radius:8px;padding:9px"><option value="3">Octava 3</option><option value="4" selected>Octava 4</option><option value="5">Octava 5</option></select><button id="addInstrument" class="primary">Crear pista de instrumento</button></div><p class="small">Toca las teclas para escuchar. Usa el botón de grabar y toca el teclado: las notas se registran en la pista MIDI virtual.</p><div id="keyboard" class="keyboard"></div></section>
-<section class="panel"><div class="section">05 · PROYECTO Y EXPORTACIÓN</div><div class="toolbar"><button id="undo">↶ Deshacer</button><button id="redo">↷ Rehacer</button><button id="exportWav" class="primary">⬇ Exportar mezcla WAV</button><button id="saveProject2">Guardar sesión</button></div><p class="small">La sesión se guarda en el almacenamiento de esta aplicación y también puedes descargar un archivo .iam. Los archivos de audio importados se conservan en el almacenamiento local de la aplicación.</p></section>
+<section class="panel"><div class="section">05 · PROYECTO Y EXPORTACIÓN MASTER</div><div class="exportOptions"><label>Frecuencia de muestreo <select id="exportRate"><option value="48000" selected>48 kHz · recomendado</option><option value="96000">96 kHz · alta resolución</option></select></label><label>Profundidad <select id="exportDepth"><option value="24" selected>24-bit PCM · entrega</option><option value="32">32-bit flotante · master</option></select></label><span class="small">WAV estéreo sin pérdida</span></div><div class="toolbar"><button id="undo">↶ Deshacer</button><button id="redo">↷ Rehacer</button><button id="exportWav" class="primary">⬇ Exportar mezcla WAV</button><button id="saveProject2">Guardar sesión</button></div><p class="small">La sesión se guarda en el almacenamiento de esta aplicación y también puedes descargar un archivo .iam. Los archivos de audio importados se conservan en el almacenamiento local de la aplicación.</p></section>
 </div>
 <script>
-const $=id=>document.getElementById(id);let audioCtx=null,master=null,analyser=null,analyserFrame=0,tracks=[],playing=false,recording=false,looping=false,position=0,startedAt=0,timer=null,zoom=80,history=[],future=[],activeVoices=new Map();
+const $=id=>document.getElementById(id);let audioCtx=null,master=null,analyser=null,analyserFrame=0,tracks=[],playing=false,recording=false,looping=false,position=0,startedAt=0,timer=null,zoom=80,history=[],future=[],activeVoices=new Map(),libraryUrls=new Map();
 const dbReq=indexedDB.open('IAMStudioDB',1);let db=null;dbReq.onupgradeneeded=e=>e.target.result.createObjectStore('audio',{keyPath:'id'});dbReq.onsuccess=e=>{db=e.target.result;restoreSession()};
 function dbPut(v){return new Promise((ok,no)=>{if(!db)return no(Error('Almacenamiento no disponible'));let q=db.transaction('audio','readwrite').objectStore('audio').put(v);q.onsuccess=()=>ok();q.onerror=()=>no(q.error)})}
 function dbGet(id){return new Promise((ok,no)=>{let q=db.transaction('audio').objectStore('audio').get(id);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)})}
@@ -80,10 +104,26 @@ function addTrack(t){snap();tracks.push(t);render();return t}
 function makeId(){return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function addAudioTrack(name,buffer,id){let t={id:id||makeId(),name:name,type:'audio',buffer:buffer,gain:1,pan:0,low:0,mid:0,high:0,muted:false,solo:false,offset:position,events:[],sourceStart:0,sourceEnd:buffer.duration};addTrack(t)}
 $('addAudio').onclick=()=>$('audioFiles').click();
-$('audioFiles').onchange=async e=>{let files=[...e.target.files];if(!files.length)return;ensureAudio();say('Importando '+files.length+' audio(s)…');for(let f of files){try{let b=await audioCtx.decodeAudioData(await f.arrayBuffer()),id=makeId();addAudioTrack(f.name,b,id);try{let channels=[];for(let c=0;c<b.numberOfChannels;c++)channels.push(Array.from(b.getChannelData(c)));await dbPut({id:id,name:f.name,sampleRate:b.sampleRate,channels:channels})}catch(err){say('Audio cargado; no se pudo guardar una copia local persistente.')} }catch(err){say('No se pudo decodificar '+f.name+'. Intenta convertirlo a WAV o MP3.')}}e.target.value='';say('Importación terminada. Las pistas aparecen en la línea de tiempo.');};
+$('libraryBrowse').onclick=()=>$('audioFiles').click();
+function renderLibrary(){
+ let host=$('libraryList');if(!host)return;
+ let audios=tracks.filter(t=>t.type==='audio');
+ host.innerHTML=audios.map(t=>'<div class="libraryItem"><span class="libName" title="'+esc(t.name)+'">♫ '+esc(t.name)+'</span><button data-lib-play="'+t.id+'">▶ ESCUCHAR</button><button data-lib-load="'+t.id+'">＋ CONSOLA</button></div>').join('')||'<div class="muted">La biblioteca está vacía. Abre la biblioteca del celular para elegir tus canciones.</div>';
+ host.querySelectorAll('[data-lib-play]').forEach(b=>b.onclick=()=>previewTrack(b.dataset.libPlay));
+ host.querySelectorAll('[data-lib-load]').forEach(b=>b.onclick=()=>{let t=tracks.find(x=>x.id===b.dataset.libLoad);if(t){say('Esta canción ya está cargada en la consola: '+t.name);document.getElementById('liveConsole').scrollIntoView({behavior:'smooth'})}});
+}
+function previewTrack(id){
+ let t=tracks.find(x=>x.id===id&&x.type==='audio');if(!t)return;
+ try{let old=libraryUrls.get(id);if(!old){let blob=new Blob([encodeWav(t.buffer,16)],{type:'audio/wav'});old=URL.createObjectURL(blob);libraryUrls.set(id,old)}
+ let player=$('libraryAudio');player.src=old;player.load();player.play().catch(()=>say('Pulsa reproducir en el reproductor de biblioteca.'));
+ $('libraryNowPlaying').textContent='ESCUCHANDO · '+t.name;
+ }catch(e){say('No se pudo preparar la vista previa: '+e.message)}
+}
+
+$('audioFiles').onchange=async e=>{let files=[...e.target.files];if(!files.length)return;ensureAudio();say('Importando '+files.length+' audio(s)…');for(let f of files){try{let b=await audioCtx.decodeAudioData(await f.arrayBuffer()),id=makeId();addAudioTrack(f.name,b,id);try{let channels=[];for(let c=0;c<b.numberOfChannels;c++)channels.push(Array.from(b.getChannelData(c)));await dbPut({id:id,name:f.name,sampleRate:b.sampleRate,channels:channels})}catch(err){say('Audio cargado; no se pudo guardar una copia local persistente.')} }catch(err){say('No se pudo decodificar '+f.name+'. Intenta convertirlo a WAV o MP3.')}}e.target.value='';renderLibrary();say('Importación terminada. Las canciones aparecen también en la biblioteca y puedes escucharlas por separado.');};
 function trackDuration(t){return t.type==='audio'?t.sourceEnd-t.sourceStart:Math.max(2,(t.notes||[]).reduce((m,n)=>Math.max(m,n.time+n.dur),0))}
 function maxTime(){return Math.max(12,...tracks.map(t=>t.offset+trackDuration(t)))}
-function render(){renderTimeline();renderTracks();renderMixer();renderConsole()}
+function render(){renderTimeline();renderTracks();renderMixer();renderConsole();renderLibrary()}
 function renderConsole(){let host=$('consoleChannels');if(!host)return;let html=tracks.map(t=>{let vals=[['low','LOW',t.low,-12,12,'dB'],['mid','MID',t.mid,-12,12,'dB'],['high','HIGH',t.high,-12,12,'dB'],['pan','PAN',t.pan,-1,1,'']];return '<div class="channel '+(t.solo?'selected':'')+'"><div class="channelName" title="'+esc(t.name)+'">'+esc(t.name)+'</div><div class="knobRow">'+vals.map(v=>knobMarkup(t,v)).join('')+'</div><div class="faderArea"><div class="faderScale"><span>+6</span><span>0</span><span>−∞</span></div><div class="faderTrack"><input aria-label="Volumen '+esc(t.name)+'" type="range" min="0" max="150" step="1" value="'+Math.round(t.gain*100)+'" data-fader="'+t.id+'"></div></div><div style="text-align:center;font-size:11px;color:#f5e4b5" id="fader-'+t.id+'">'+Math.round(t.gain*100)+'%</div><div class="channelBtns"><button data-console="mute" data-id="'+t.id+'" class="'+(t.muted?'on':'')+'">MUTE</button><button data-console="solo" data-id="'+t.id+'" class="'+(t.solo?'on':'')+'">SOLO</button></div></div>'}).join('');host.innerHTML=html||'<div class="muted" style="padding:20px">Importa pistas para crear canales en la consola.</div>';host.querySelectorAll('[data-fader]').forEach(el=>el.oninput=()=>{changeControl(el.dataset.fader,'gain',Number(el.value)/100);let out=$('fader-'+el.dataset.fader);if(out)out.textContent=el.value+'%'});host.querySelectorAll('[data-knob]').forEach(el=>{let id=el.dataset.id,key=el.dataset.knob,min=Number(el.dataset.min),max=Number(el.dataset.max),startY=0,startV=0;const set=v=>{v=Math.max(min,Math.min(max,v));el.dataset.value=v;changeControl(id,key,v);let value=el.parentElement.querySelector('.knobValue');if(value)value.textContent=key==='pan'?(v<-.02?'L '+Math.round(-v*100):v>.02?'R '+Math.round(v*100):'C'):Math.round(v*10)/10+(key==='low'||key==='mid'||key==='high'?' dB':'');let deg=(v-min)/(max-min)*270;el.style.setProperty('--knob-angle',deg+'deg');el.style.setProperty('--needle',(deg-135)+'deg')};el.onpointerdown=e=>{e.preventDefault();startY=e.clientY;startV=Number(el.dataset.value);el.setPointerCapture(e.pointerId)};el.onpointermove=e=>{if(e.buttons||e.pressure){let range=max-min;set(startV+(startY-e.clientY)*range/150)}};el.onwheel=e=>{e.preventDefault();set(Number(el.dataset.value)+(e.deltaY<0?1:-1)*(max-min)/100)};el.ondblclick=()=>set(key==='pan'?0:0)})}
 function knobMarkup(t,v){let val=v[2],deg=(val-v[3])/(v[4]-v[3])*270,display=v[0]==='pan'?(val<-.02?'L '+Math.round(-val*100):val>.02?'R '+Math.round(val*100):'C'):Math.round(val*10)/10+' '+v[5];return '<div class="knobWrap"><div class="knob" role="slider" aria-label="'+v[1]+'" tabindex="0" data-knob="'+v[0]+'" data-id="'+t.id+'" data-min="'+v[3]+'" data-max="'+v[4]+'" data-value="'+val+'" style="--knob-angle:'+deg+'deg;--needle:'+(deg-135)+'deg"></div><span class="knobLabel">'+v[1]+'</span><span class="knobValue">'+display+'</span></div>'}
 document.addEventListener('click',e=>{let b=e.target.closest('button[data-console]');if(!b)return;let t=tracks.find(x=>x.id===b.dataset.id);if(!t)return;if(b.dataset.console==='mute')t.muted=!t.muted;if(b.dataset.console==='solo')t.solo=!t.solo;renderConsole();if(playing)restartPlaybackAtPosition()});
@@ -122,7 +162,47 @@ async function saveSession(){let meta=[];for(let t of tracks){meta.push({id:t.id
 $('saveProject').onclick=saveSession;$('saveProject2').onclick=saveSession;$('loadProject').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let p=JSON.parse(await f.text());if(p.format!=='IAM-STUDIO-1')throw Error('Archivo de proyecto no reconocido');stop();tracks=[];for(let t of p.tracks){if(t.type==='audio'){let saved=await dbGet(t.id);if(!saved){say('Falta el audio original '+t.name+'. Vuelve a importarlo para reconstruir la sesión.');continue}let b=audioCtx||ensureAudio(),buf=b.createBuffer(saved.channels.length,saved.channels[0].length,saved.sampleRate);saved.channels.forEach((c,i)=>buf.copyToChannel(new Float32Array(c),i));tracks.push({...t,buffer:buf})}else tracks.push(t)}$('bpm').value=p.bpm||120;render();say('Proyecto abierto. Revisa que estén todos los archivos de audio vinculados.')}catch(err){say('No se pudo abrir el proyecto: '+err.message)}e.target.value=''};
 async function restoreSession(){try{let p=JSON.parse(localStorage.getItem('iamStudioMeta')||'null');if(!p)return;for(let t of p.tracks){if(t.type==='audio'){let saved=await dbGet(t.id);if(!saved)continue;let ac=ensureAudio(),buf=ac.createBuffer(saved.channels.length,saved.channels[0].length,saved.sampleRate);saved.channels.forEach((c,i)=>buf.copyToChannel(new Float32Array(c),i));tracks.push({...t,buffer:buf})}else tracks.push(t)}$('bpm').value=p.bpm||120;render();say('Se restauró la última sesión guardada en este dispositivo.')}catch(e){}}
-$('exportWav').onclick=async()=>{if(!tracks.length)return;say('Renderizando la mezcla…');try{let dur=maxTime()+1,rate=44100,frames=Math.ceil(dur*rate);if(frames>rate*12*60)throw Error('La mezcla supera 12 minutos');let off=new OfflineAudioContext(2,frames,rate),m=off.createGain();m.connect(off.destination);tracks.filter(active).forEach(t=>{if(t.type==='audio'){let s=off.createBufferSource();s.buffer=t.buffer;let g=off.createGain(),p=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;g.gain.value=t.gain;p.pan.value=t.pan;lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;s.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);s.start(t.offset,t.sourceStart,t.sourceEnd-t.sourceStart);(t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param){param.setTargetAtTime(ev.value,Math.max(0,t.offset+ev.time),.015)}})}else (t.notes||[]).forEach(n=>{let o=off.createOscillator(),g=off.createGain();o.type=t.instrument==='organ'?'square':t.instrument==='bass'?'triangle':'sine';o.frequency.value=440*Math.pow(2,(n.note-69)/12);g.gain.value=t.gain*.2;o.connect(g);g.connect(m);o.start(t.offset+n.time);o.stop(t.offset+n.time+n.dur+.1)})});let b=await off.startRendering(),wav=wavFile(b),url=URL.createObjectURL(new Blob([wav],{type:'audio/wav'})),a=document.createElement('a');a.href=url;a.download='I-A-M_Studio.wav';a.click();setTimeout(()=>URL.revokeObjectURL(url),20000);say('Mezcla WAV exportada.')}catch(e){say('Error al exportar: '+e.message)}};
-function wavFile(b){let n=b.length,ab=new ArrayBuffer(44+n*4),v=new DataView(ab),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');v.setUint32(4,36+n*4,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);v.setUint32(24,b.sampleRate,true);v.setUint32(28,b.sampleRate*4,true);v.setUint16(32,4,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*4,true);let l=b.getChannelData(0),r=b.getChannelData(1),o=44;for(let i=0;i<n;i++)for(let x of [l[i],r[i]]){let z=Math.max(-1,Math.min(1,x));v.setInt16(o,z<0?z*32768:z*32767,true);o+=2}return ab}
+$('exportWav').onclick=async()=>{
+ if(!tracks.length)return;
+ say('Renderizando el master WAV sin pérdida…');
+ try{
+  let dur=maxTime()+1,rate=Number($('exportRate').value)||48000,depth=Number($('exportDepth').value)||24,frames=Math.ceil(dur*rate);
+  if(frames>rate*12*60)throw Error('La mezcla supera 12 minutos');
+  let off=new OfflineAudioContext(2,frames,rate),m=off.createGain();
+  m.gain.value=Number($('masterLevel').value||85)/100;m.connect(off.destination);
+  tracks.filter(active).forEach(t=>{
+   if(t.type==='audio'){
+    let src=off.createBufferSource();src.buffer=t.buffer;
+    let g=off.createGain(),p=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();
+    lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
+    g.gain.value=t.gain;p.pan.value=t.pan;lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;
+    src.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    src.start(t.offset,t.sourceStart,t.sourceEnd-t.sourceStart);
+    (t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param)param.setTargetAtTime(ev.value,Math.max(0,t.offset+ev.time),.015)});
+   }else (t.notes||[]).forEach(n=>{
+    let o=off.createOscillator(),g=off.createGain();o.type=t.instrument==='organ'?'square':t.instrument==='bass'?'triangle':t.instrument==='strings'?'sawtooth':'sine';
+    o.frequency.value=440*Math.pow(2,(n.note-69)/12);g.gain.value=t.gain*.2;o.connect(g);g.connect(m);o.start(t.offset+n.time);o.stop(t.offset+n.time+n.dur+.1);
+   });
+  });
+  let rendered=await off.startRendering(),wav=encodeWav(rendered,depth),url=URL.createObjectURL(new Blob([wav],{type:'audio/wav'})),a=document.createElement('a');
+  a.href=url;a.download='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  say('Master WAV exportado: '+rate+' Hz · '+depth+' bits · estéreo · sin pérdida.');
+ }catch(e){say('Error al exportar: '+e.message)}
+};
+function encodeWav(b,depth){
+ let channels=2,n=b.length,bytes=depth===32?4:depth===24?3:2,float=depth===32,dataBytes=n*channels*bytes,ab=new ArrayBuffer(44+dataBytes),v=new DataView(ab);
+ const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');v.setUint32(4,36+dataBytes,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);
+ v.setUint16(20,float?3:1,true);v.setUint16(22,channels,true);v.setUint32(24,b.sampleRate,true);v.setUint32(28,b.sampleRate*channels*bytes,true);
+ v.setUint16(32,channels*bytes,true);v.setUint16(34,depth,true);w(36,'data');v.setUint32(40,dataBytes,true);
+ let left=b.getChannelData(0),right=b.numberOfChannels>1?b.getChannelData(1):left,o=44;
+ for(let i=0;i<n;i++)for(let sample of [left[i],right[i]]){
+  let x=Math.max(-1,Math.min(1,sample));
+  if(float){v.setFloat32(o,x,true);o+=4}
+  else if(depth===24){let q=Math.round(x<0?x*8388608:x*8388607);v.setUint8(o,q&255);v.setUint8(o+1,(q>>8)&255);v.setUint8(o+2,(q>>16)&255);o+=3}
+  else{v.setInt16(o,Math.round(x<0?x*32768:x*32767),true);o+=2}
+ }
+ return ab;
+}
 render();
 </script></body></html>
