@@ -71,7 +71,7 @@ jobs:
                   android:allowBackup="false">
                   <activity
                       android:name="com.iam.musicstudio.MainActivity"
-                      android:screenOrientation="unspecified"
+                      android:screenOrientation="sensorLandscape"
                       android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
