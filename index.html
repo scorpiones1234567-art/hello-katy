@@ -141,7 +141,7 @@ function createInstrumentVoice(ctx,dest,instrument,note,when,dur,velocity=.2,hel
  amp.gain.setValueAtTime(.0001,when);amp.gain.linearRampToValueAtTime(Math.max(.0001,velocity),when+attack);
  if(decay>0)amp.gain.setTargetAtTime(Math.max(.0001,velocity*sustain),when+attack,decay);
  filter.connect(amp);amp.connect(dest);
- nodes.forEach(o=>{o.connect(filter)});
+ 
  let stopAt=when+Math.max(.04,dur);
  if(!held){amp.gain.setTargetAtTime(.0001,stopAt,release);nodes.forEach(o=>{try{o.stop(stopAt+release*4)}catch(e){}})}
  return {release:()=>{let now=ctx.currentTime;try{amp.gain.cancelScheduledValues(now);amp.gain.setTargetAtTime(.0001,now,release);nodes.forEach(o=>{try{o.stop(now+release*4)}catch(e){}})}catch(e){}}};
@@ -191,8 +191,8 @@ function active(t){return !t.muted&&(!tracks.some(x=>x.solo)||t.solo)}
 function valueAt(t,key,base,at){let ev=(t.events||[]).filter(x=>x.key===key).sort((a,b)=>a.time-b.time);let v=base;for(let e of ev){if(e.time<=at)v=e.value;else break}return v}
 function updateLive(t){let n=t.live;if(!n||!audioCtx)return;let at=audioCtx.currentTime;n.gain.gain.setTargetAtTime(valueAt(t,'gain',t.gain,currentTime()),at,.025);n.pan.pan.setTargetAtTime(valueAt(t,'pan',t.pan,currentTime()),at,.025);n.low.gain.setTargetAtTime(valueAt(t,'low',t.low,currentTime()),at,.025);n.mid.gain.setTargetAtTime(valueAt(t,'mid',t.mid,currentTime()),at,.025);n.high.gain.setTargetAtTime(valueAt(t,'high',t.high,currentTime()),at,.025)}
 function makeChain(t,dest,at){let hp=audioCtx.createBiquadFilter(),g=audioCtx.createGain(),p=audioCtx.createStereoPanner(),lo=audioCtx.createBiquadFilter(),mi=audioCtx.createBiquadFilter(),hi=audioCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;lo.gain.value=valueAt(t,'low',t.low,at);mi.gain.value=valueAt(t,'mid',t.mid,at);hi.gain.value=valueAt(t,'high',t.high,at);g.gain.value=valueAt(t,'gain',t.gain,at);p.pan.value=valueAt(t,'pan',t.pan,at);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(dest);return {gain:g,pan:p,low:lo,mid:mi,high:hi,highpass:hp}}
-function playAudio(t,when,from){let src=audioCtx.createBufferSource();src.buffer=t.buffer;let chain=makeChain(t,master,from);src.connect(chain.low);src.start(when,Math.min(t.sourceEnd,t.sourceStart+Math.max(0,from-t.offset)),Math.max(.01,t.sourceEnd-t.sourceStart-Math.max(0,from-t.offset)));t.live=chain;t.live.source=src;src.onended=()=>{}}
-function synthVoice(t,note,when,dur){let chain=makeChain(t,master,when);createInstrumentVoice(audioCtx,chain.low,t.instrument,note,when,dur,Math.min(.32,.20*t.gain),false)}
+function playAudio(t,when,from){let src=audioCtx.createBufferSource();src.buffer=t.buffer;let chain=makeChain(t,master,from);src.connect(chain.highpass);src.start(when,Math.min(t.sourceEnd,t.sourceStart+Math.max(0,from-t.offset)),Math.max(.01,t.sourceEnd-t.sourceStart-Math.max(0,from-t.offset)));t.live=chain;t.live.source=src;src.onended=()=>{}}
+function synthVoice(t,note,when,dur){let chain=makeChain(t,master,when);createInstrumentVoice(audioCtx,chain.highpass,t.instrument,note,when,dur,Math.min(.32,.20*t.gain),false)}
 function scheduleNotes(t,from){(t.notes||[]).forEach(n=>{let when=startedAt+t.offset+n.time;if(when<audioCtx.currentTime) return;synthVoice(t,n.note,when,n.dur)})}
 function play(){if(!tracks.length){say('Primero importa audio o crea una pista virtual.');return}ensureAudio();stop(false);playing=true;startedAt=audioCtx.currentTime-position;tracks.forEach(t=>{if(!active(t))return;if(t.type==='audio')playAudio(t,audioCtx.currentTime+Math.max(0,t.offset-position),position);else scheduleNotes(t,position)});$('play').textContent='Ⅱ PAUSAR';$('recText').textContent=recording?'GRABANDO':'REPRODUCIENDO';$('recLamp').classList.toggle('on',recording);say(recording?'Grabando movimientos de automatización. Mueve los faders mientras suena.':'Reproducción activa. Activa grabación de automatización para guardar tus movimientos.');tick()}
 function stop(reset=true){if(timer)clearInterval(timer);timer=null;if(playing&&audioCtx)position=currentTime();if(audioCtx){tracks.forEach(t=>{if(t.live&&t.live.source){try{t.live.source.stop()}catch(e){}}t.live=null})}playing=false;$('play').textContent='▶ REPRODUCIR';if(reset){$('recText').textContent=recording?'ARMADO':'LISTO'}updatePlayhead()}
@@ -227,9 +227,13 @@ $('exportWav').onclick=async()=>{
     src.connect(hp);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
     src.start(t.offset,t.sourceStart,t.sourceEnd-t.sourceStart);
     (t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param)param.setTargetAtTime(ev.value,Math.max(0,ev.time),.015)});
-   }else (t.notes||[]).forEach(n=>{
-    createInstrumentVoice(off,m,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20*t.gain),false);
-   });
+   }else {
+    let hp=off.createBiquadFilter(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner();
+    hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
+    lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;g.gain.value=t.gain;p.pan.value=t.pan;
+    hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20*t.gain),false));
+   }
   });
   let rendered=await off.startRendering(),wav=encodeWav(rendered,depth),url=URL.createObjectURL(new Blob([wav],{type:'audio/wav'})),a=document.createElement('a');
   a.href=url;a.download='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';a.click();
