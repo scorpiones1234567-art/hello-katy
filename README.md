@@ -1,43 +1,44 @@
-# I-A-M MEZCLADOR MUSICAL
+# I-A-M Studio
 
-Mezclador multipista para Android, con una interfaz web local integrada en una aplicación WebView.
+Estudio de producción musical multipista para Android (WebView) y navegador compatible.
 
-## Funciones de esta primera versión
+## Funciones implementadas en esta versión
 
-- Importar varios archivos de audio en una sola sesión.
-- Reproducir las pistas sincronizadas desde el inicio.
-- Control individual de volumen, panorama izquierda/derecha y silencio.
-- Cortar cada instrumento en un punto elegido para crear clips separados.
-- Recortar inicio y final de cada clip y moverlo en la mezcla.
-- Cambiar volumen, ecualización, panorama y tono en tiempo real durante la reproducción.
-- Modo SOLO para escuchar una pista aislada.
-- Ecualización individual de graves, medios y agudos.
-- Ajuste individual de tono por semitonos.
-- Retraso de inicio por pista para alinear las partes.
-- Control maestro de volumen, velocidad y tono.
-- Exportar la mezcla estéreo como WAV de 16 bits.
+- Importar varias pistas de audio y verlas en una línea de tiempo multipista.
+- Reproducir y detener la mezcla sincronizada.
+- Consola con volumen, panorama, graves, medios y agudos por pista.
+- Mute y Solo por pista.
+- Grabación de automatización: mientras la canción reproduce, los cambios de volumen, panorama y ecualización se guardan con su posición temporal.
+- Instrumentos virtuales básicos (piano/seno, órgano, bajo, cuerdas y sintetizador) tocables desde un teclado en pantalla.
+- Eventos de notas internos al tocar el teclado con la grabación armada y la reproducción activa.
+- Control de tempo (BPM), loop y zoom de línea de tiempo.
+- Guardar sesión .iam y restaurar la última sesión local del dispositivo mediante IndexedDB/localStorage.
+- Exportar mezcla WAV estéreo.
+- Procesamiento local; no se envían las canciones a un servidor.
 
-## Uso
+## Uso rápido
 
-1. Abre I-A-M y pulsa **SUBIR PISTAS**.
-2. Selecciona varios instrumentos o voces.
-3. Ajusta el volumen, panorama, ecualización, tono y retraso de cada pista.
-4. Usa SOLO o SILENCIAR para comparar pistas.
-5. Reproduce la mezcla y exporta el resultado WAV.
+1. Pulsa Importar audio y selecciona una o varias pistas.
+2. Pulsa Reproducir para escuchar la mezcla.
+3. Activa Grabar automatización y mueve los faders o la ecualización mientras suena.
+4. Detén la grabación; los movimientos quedan asociados al segundo en que los hiciste.
+5. Agrega un instrumento virtual, selecciona su sonido y toca las teclas en pantalla.
+6. Guarda el proyecto y exporta la mezcla WAV.
 
-Los archivos originales no se sobrescriben. El procesamiento de audio se realiza en el dispositivo; no se suben canciones a un servidor.
+## Guardado de proyectos
 
-## Limitaciones conocidas
+El archivo .iam conserva la estructura de pistas, controles, notas y automatizaciones. Las muestras de audio se almacenan localmente en el dispositivo. Para abrir el proyecto en otro dispositivo, los archivos de audio originales deberán importarse allí; el archivo .iam no incorpora dentro de sí todos los audios pesados.
 
-- La exportación de esta primera versión es WAV; MP3 todavía no está incorporado.
-- El control de velocidad cambia también el tono (no es time-stretch independiente).
-- La alineación es manual mediante el control de posición; no hay detección automática de BPM ni sincronización inteligente.
-- Los cortes y cambios de posición se aplican al iniciar de nuevo la reproducción; volumen, ecualización, panorama, tono y tempo responden durante la reproducción.
-- Los cortes crean clips derivados en la sesión; el archivo de audio original permanece intacto.
-- El motor trabaja con los formatos que Android/WebView pueda decodificar.
-- Los proyectos no se guardan todavía como sesiones editables al cerrar la aplicación.
+## Alcance y limitaciones conocidas
+
+- Esta es una primera versión funcional del estudio, no sustituye todavía a una DAW profesional.
+- Los instrumentos virtuales son sintetizadores básicos; todavía no incluyen bibliotecas de muestras realistas de piano, batería, guitarra o instrumentos acústicos.
+- La grabación de notas del teclado es una secuencia interna simplificada; no es todavía un editor MIDI completo.
+- La automatización registra movimientos de volumen, panorama y ecualización. La exportación WAV aplica actualmente automatización de volumen y panorama; se ampliará la reproducción/exportación de curvas de EQ en la siguiente revisión.
+- No incluye aún grabación de micrófono, plugins VST/AU, separación de stems, time-stretch independiente, cuantización avanzada ni exportación MP3.
+- Los formatos de audio que se pueden importar dependen del decodificador disponible en Android WebView.
+- La cantidad de pistas y duración máxima dependen de la memoria disponible en el dispositivo.
 
 ## Compilación Android
 
-GitHub Actions construye el APK de depuración con Java 17, Android SDK 35 y Gradle 8.9. En el repositorio, abre **Actions**, selecciona el flujo **Construir I-A-M MEZCLADOR MUSICAL APK** y descarga el artefacto `IAM-MEZCLADOR-MUSICAL-APK`.
-
+GitHub Actions construye el APK de depuración con Java 17, Android SDK 35 y Gradle 8.9. Abre Actions, selecciona Construir I-A-M MEZCLADOR MUSICAL APK y descarga el artefacto IAM-MEZCLADOR-MUSICAL-APK.
