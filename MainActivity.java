@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
@@ -34,8 +35,17 @@ public class MainActivity extends Activity {
                 fileCallback = callback;
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("audio/*");
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                String[] accepted = params.getAcceptTypes();
+                boolean project = false;
+                if (accepted != null) {
+                    for (String type : accepted) {
+                        if (type != null && (type.contains("json") || type.contains("octet-stream"))) project = true;
+                    }
+                }
+                intent.setType(project ? "*/*" : "audio/*");
+                if (project) intent.putExtra(Intent.EXTRA_MIME_TYPES,
+                    new String[]{"application/json", "application/octet-stream", "application/x-iam"});
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                 try {
                     startActivityForResult(intent, FILE_REQUEST);
