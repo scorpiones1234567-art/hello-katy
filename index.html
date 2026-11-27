@@ -280,17 +280,17 @@ $('exportWav').onclick=async()=>{
     let src=off.createBufferSource();src.buffer=t.buffer;
     let hp=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner(),sp=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();
     hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
-    src.connect(hp);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    src.connect(hp);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(sp);sp.connect(m);
     applyTrackAutomation(t,{gain:g.gain,pan:p.pan,low:lo.gain,mid:mi.gain,high:hi.gain});
-    let begin=Math.max(0,t.offset),from=Math.max(0,t.sourceStart||0),available=t.buffer.duration-from;
+    scheduleOfflineSpatial(sp.pan,t,maxTime());\n    let begin=Math.max(0,t.offset),from=Math.max(0,t.sourceStart||0),available=t.buffer.duration-from;
     let length=Math.min(available,t.sourceEnd==null?available:Math.max(0,t.sourceEnd-from));
     if(length>0){scheduleOfflineSpatial(sp.pan,t,Math.max(0,begin+length));src.start(begin,from,length)}
    }else{
     let hp=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner(),sp=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();
     hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
-    hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(sp);sp.connect(m);
     applyTrackAutomation(t,{gain:g.gain,pan:p.pan,low:lo.gain,mid:mi.gain,high:hi.gain});
-    (t.notes||[]).forEach(n=>{let when=t.offset+n.time;let voicePan=off.createStereoPanner();hp.disconnect();hp.connect(voicePan);voicePan.connect(g);scheduleOfflineSpatial(voicePan.pan,t,n.dur);createInstrumentVoice(off,voicePan,t.instrument,n.note,when,n.dur,Math.min(.32,.20),false);hp.disconnect();hp.connect(lo)});
+    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20),false));
    }
   });
   say('Procesando el master WAV…');
