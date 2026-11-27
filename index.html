@@ -210,12 +210,38 @@ async function saveSession(){let meta=[];for(let t of tracks){meta.push({id:t.id
 $('saveProject').onclick=saveSession;$('saveProject2').onclick=saveSession;$('loadProject').onclick=()=>$('projectFile').click();
 $('projectFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let p=JSON.parse(await f.text());if(p.format!=='IAM-STUDIO-1')throw Error('Archivo de proyecto no reconocido');stop();tracks=[];for(let t of p.tracks){if(t.type==='audio'){let saved=await dbGet(t.id);if(!saved){say('Falta el audio original '+t.name+'. Vuelve a importarlo para reconstruir la sesión.');continue}let b=audioCtx||ensureAudio(),buf=b.createBuffer(saved.channels.length,saved.channels[0].length,saved.sampleRate);saved.channels.forEach((c,i)=>buf.copyToChannel(new Float32Array(c),i));tracks.push({...t,buffer:buf})}else tracks.push(t)}$('bpm').value=p.bpm||120;render();say('Proyecto abierto. Revisa que estén todos los archivos de audio vinculados.')}catch(err){say('No se pudo abrir el proyecto: '+err.message)}e.target.value=''};
 async function restoreSession(){try{let p=JSON.parse(localStorage.getItem('iamStudioMeta')||'null');if(!p)return;for(let t of p.tracks){if(t.type==='audio'){let saved=await dbGet(t.id);if(!saved)continue;let ac=ensureAudio(),buf=ac.createBuffer(saved.channels.length,saved.channels[0].length,saved.sampleRate);saved.channels.forEach((c,i)=>buf.copyToChannel(new Float32Array(c),i));tracks.push({...t,buffer:buf})}else tracks.push(t)}$('bpm').value=p.bpm||120;render();say('Se restauró la última sesión guardada en este dispositivo.')}catch(e){}}
+function saveWavOnAndroid(buffer,name){
+ return new Promise((resolve,reject)=>{
+  if(!window.IAMAndroid){reject(new Error('Guardado nativo no disponible'));return}
+  let ready=false,finished=false;
+  window.IAMNativeSaveReady=ok=>{
+   if(!ok){finished=true;reject(new Error('Android no pudo crear el archivo'));return}
+   ready=true;
+   try{
+    const bytes=new Uint8Array(buffer),chunkSize=48*1024;
+    for(let offset=0;offset<bytes.length;offset+=chunkSize){
+     const part=bytes.subarray(offset,Math.min(bytes.length,offset+chunkSize));
+     let binary='';for(let i=0;i<part.length;i++)binary+=String.fromCharCode(part[i]);
+     window.IAMAndroid.writeWavChunk(btoa(binary));
+    }
+    window.IAMAndroid.finishWav();
+   }catch(e){window.IAMAndroid.cancelWav();finished=true;reject(e)}
+  };
+  window.IAMNativeSaveDone=(ok,message)=>{
+   if(finished)return;finished=true;
+   if(ok)resolve(message);else reject(new Error(message||'Error al guardar WAV'));
+  };
+  window.IAMAndroid.createWav(name);
+ });
+}
 $('exportWav').onclick=async()=>{
- if(!tracks.length)return;
- say('Renderizando el master WAV sin pérdida…');
+ if(!tracks.length){say('Primero importa audio o crea un instrumento.');return}
+ const button=$('exportWav');button.disabled=true;
+ say('Preparando la mezcla completa…');
  try{
   let dur=maxTime()+1,rate=Number($('exportRate').value)||48000,depth=Number($('exportDepth').value)||24,frames=Math.ceil(dur*rate);
   if(frames>rate*12*60)throw Error('La mezcla supera 12 minutos');
+  if(!tracks.some(active))throw Error('Todas las pistas están silenciadas o no hay pistas activas');
   let off=new OfflineAudioContext(2,frames,rate),m=off.createGain(),exportAnalyser=off.createGain();
   m.gain.value=Number($('masterLevel').value||85)/100;makeMasterChain(off,m,exportAnalyser);exportAnalyser.connect(off.destination);
   tracks.filter(active).forEach(t=>{
@@ -223,24 +249,27 @@ $('exportWav').onclick=async()=>{
     let src=off.createBufferSource();src.buffer=t.buffer;
     let hp=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();
     hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
-    g.gain.value=t.gain;p.pan.value=t.pan;lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;
-    src.connect(hp);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
-    src.start(t.offset,t.sourceStart,t.sourceEnd-t.sourceStart);
-    (t.events||[]).forEach(ev=>{let param=ev.key==='gain'?g.gain:ev.key==='pan'?p.pan:ev.key==='low'?lo.gain:ev.key==='mid'?mi.gain:ev.key==='high'?hi.gain:null;if(param)param.setTargetAtTime(ev.value,Math.max(0,ev.time),.015)});
-   }else {
-    let hp=off.createBiquadFilter(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner();
-    hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
     lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;g.gain.value=t.gain;p.pan.value=t.pan;
-    hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
-    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20*t.gain),false));
+    src.connect(hp);hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    let begin=Math.max(0,t.offset),from=Math.max(0,t.sourceStart||0),available=t.buffer.duration-from;
+    let length=Math.min(available,t.sourceEnd==null?available:Math.max(0,t.sourceEnd-from));
+    if(length>0)src.start(begin,from,length);
+   }else{
+    (t.notes||[]).forEach(n=>createInstrumentVoice(off,m,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20*t.gain),false));
    }
   });
-  let rendered=await off.startRendering(),wav=encodeWav(rendered,depth),url=URL.createObjectURL(new Blob([wav],{type:'audio/wav'})),a=document.createElement('a');
-  a.href=url;a.download='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';a.click();
+  say('Procesando el master WAV…');
+  let rendered=await off.startRendering(),wav=encodeWav(rendered,depth);
+  let blob=new Blob([wav],{type:'audio/wav'}),url=URL.createObjectURL(blob);
+  let fileName='I-A-M_Studio_'+rate+'Hz_'+depth+'bit.wav';
+  if(window.IAMAndroid)await saveWavOnAndroid(wav,fileName);
+  else{let a=document.createElement('a');a.href=url;a.download=fileName;a.click()}
   let previous=libraryUrls.get('final');if(previous)URL.revokeObjectURL(previous);libraryUrls.set('final',url);
-  $('libraryAudio').src=url;$('libraryAudio').load();$('libraryNowPlaying').textContent='MASTER FINAL · '+rate+' Hz · '+depth+' bits · pulsa reproducir para revisar la mezcla';
-  say('Master WAV exportado: '+rate+' Hz · '+depth+' bits · estéreo · sin pérdida. Ya está cargado en el reproductor independiente para revisarlo.');
- }catch(e){say('Error al exportar: '+e.message)}
+  $('libraryAudio').src=url;$('libraryAudio').load();$('libraryNowPlaying').textContent='MASTER FINAL · '+rate+' Hz · '+depth+' bits · listo para escuchar';
+  $('libraryAudio').play().catch(()=>{});
+  say('¡Mezcla WAV guardada! '+rate+' Hz · '+depth+' bits · estéreo. Ya está cargada en el reproductor independiente.');
+ }catch(e){say('No se pudo exportar la mezcla: '+(e&&e.message?e.message:String(e)))}
+ finally{button.disabled=false}
 };
 function encodeWav(b,depth){
  let channels=2,n=b.length,bytes=depth===32?4:depth===24?3:2,float=depth===32,dataBytes=n*channels*bytes,ab=new ArrayBuffer(44+dataBytes),v=new DataView(ab);
