@@ -255,7 +255,11 @@ $('exportWav').onclick=async()=>{
     let length=Math.min(available,t.sourceEnd==null?available:Math.max(0,t.sourceEnd-from));
     if(length>0)src.start(begin,from,length);
    }else{
-    (t.notes||[]).forEach(n=>createInstrumentVoice(off,m,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20*t.gain),false));
+    let hp=off.createBiquadFilter(),g=off.createGain(),p=off.createStereoPanner(),lo=off.createBiquadFilter(),mi=off.createBiquadFilter(),hi=off.createBiquadFilter();
+    hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
+    lo.gain.value=t.low;mi.gain.value=t.mid;hi.gain.value=t.high;g.gain.value=t.gain;p.pan.value=t.pan;
+    hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(m);
+    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20),false));
    }
   });
   say('Procesando el master WAV…');
