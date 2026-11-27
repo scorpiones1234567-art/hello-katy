@@ -290,7 +290,7 @@ $('exportWav').onclick=async()=>{
     hp.type='highpass';hp.frequency.value=28;hp.Q.value=.707;lo.type='lowshelf';lo.frequency.value=250;mi.type='peaking';mi.frequency.value=1200;mi.Q.value=.8;hi.type='highshelf';hi.frequency.value=5000;
     hp.connect(lo);lo.connect(mi);mi.connect(hi);hi.connect(g);g.connect(p);p.connect(sp);sp.connect(m);
     applyTrackAutomation(t,{gain:g.gain,pan:p.pan,low:lo.gain,mid:mi.gain,high:hi.gain});
-    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20),false));
+    scheduleOfflineSpatial(sp.pan,t,maxTime());\n    (t.notes||[]).forEach(n=>createInstrumentVoice(off,hp,t.instrument,n.note,t.offset+n.time,n.dur,Math.min(.32,.20),false));
    }
   });
   say('Procesando el master WAV…');
