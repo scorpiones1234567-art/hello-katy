@@ -33,7 +33,8 @@ jobs:
 
       - name: Crear proyecto Android WebView del mezclador
         run: |
-          mkdir -p app/src/main/java/com/iam/musicstudio app/src/main/assets
+          mkdir -p app/src/main/java/com/iam/musicstudio app/src/main/assets app/src/main/res/drawable
+          cp ic_launcher.xml app/src/main/res/drawable/ic_launcher.xml
           cp MainActivity.java app/src/main/java/com/iam/musicstudio/MainActivity.java
           cp index.html app/src/main/assets/index.html
           cat > settings.gradle <<'EOF'
@@ -67,7 +68,8 @@ jobs:
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:theme="@android:style/Theme.Material.NoActionBar"
-                  android:label="I-A-M MEZCLADOR MUSICAL"
+                  android:label="I-A-M STUDIO"
+                  android:icon="@drawable/ic_launcher"
                   android:allowBackup="false">
                   <activity
                       android:name="com.iam.musicstudio.MainActivity"
