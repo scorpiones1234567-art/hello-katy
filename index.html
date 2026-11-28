@@ -217,9 +217,14 @@ window.IAMReceiveAudioStart=(id,name)=>{
 };
 window.IAMReceiveAudioChunk=(id,b64)=>{
  const item=iamNativeBuffers.get(id);if(!item)return;
- const raw=atob(b64),chunk=new Uint8Array(raw.length);
- for(let i=0;i<raw.length;i++)chunk[i]=raw.charCodeAt(i);
- item.chunks.push(chunk);item.bytes+=chunk.length;
+ try{
+  const raw=atob(b64),chunk=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)chunk[i]=raw.charCodeAt(i);
+  item.chunks.push(chunk);item.bytes+=chunk.length;
+ }catch(err){
+  if(iamNativeBatch)iamNativeBatch.failed.push(item.name+': bloque de audio dañado ('+(err.message||'error')+')');
+  iamNativeBuffers.delete(id);
+ }
 };
 window.IAMReceiveAudioDone=id=>{
  const item=iamNativeBuffers.get(id);
@@ -228,6 +233,7 @@ window.IAMReceiveAudioDone=id=>{
  iamNativeBuffers.delete(id);
  iamNativeDecodeChain=iamNativeDecodeChain.then(async()=>{
   try{
+   if(!item.bytes)throw new Error('Android no entregó datos del archivo');
    const bytes=new Uint8Array(item.bytes);let offset=0;
    for(const part of item.chunks){bytes.set(part,offset);offset+=part.length}
    item.chunks.length=0;
