@@ -154,9 +154,51 @@ $$('.nm').forEach(el=>el.onclick=()=>{tgt=+el.dataset.i;$('#fi').click()});
 $('#op').onclick=()=>{tgt=null;$('#fi').click()};
 function lib(){$('#lib').innerHTML=S.map((s,i)=>s.buf?`<div>♫ ${esc(s.name)} → ${CH[i][0]}</div>`:'').join('')||'<div class="e">Vacía. Pulsa “Abrir archivos”.</div>';S.forEach((s,i)=>$('#fl'+i).textContent=s.buf?s.name:'toca el nombre')}
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-$('#fi').onchange=async e=>{ensure();const fs=[...e.target.files],w=playing,p=pos;if(w)pause();
- for(const f of fs){try{const b=await ctx.decodeAudioData(await f.arrayBuffer());let i=tgt!=null&&fs.length==1?tgt:CH.findIndex((d,j)=>d[3].test(f.name)&&!S[j].buf);if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);if(i<0)i=7;S[i].buf=b;S[i].name=f.name}catch(x){say('No pude leer '+f.name+' (prueba WAV o MP3)')}}
- tgt=null;e.target.value='';lib();$('#sk').max=dur();pos=p;say('Listo: '+S.filter(s=>s.buf).length+' canales cargados.');if(w)play()};
+function readAudioFile(file){
+ return new Promise((resolve,reject)=>{
+  if(file.arrayBuffer){file.arrayBuffer().then(resolve,reject);return}
+  const reader=new FileReader();
+  reader.onload=()=>resolve(reader.result);
+  reader.onerror=()=>reject(reader.error||new Error('No se pudo leer el archivo'));
+  reader.readAsArrayBuffer(file);
+ });
+}
+function decodeAudio(data){
+ return new Promise((resolve,reject)=>{
+  try{
+   const copy=data.slice?data.slice(0):data;
+   const result=ctx.decodeAudioData(copy,resolve,reject);
+   if(result&&typeof result.then==='function')result.then(resolve,reject);
+  }catch(err){reject(err)}
+ });
+}
+$('#fi').onchange=async e=>{
+ const fs=[...e.target.files];
+ if(!fs.length){say('No se seleccionó ninguna canción.');return}
+ say('Leyendo '+fs.length+' archivo(s)...');
+ const wasPlaying=playing,oldPos=pos;
+ if(wasPlaying)pause();
+ let loaded=0,failed=[];
+ try{
+  ensure();
+  for(const f of fs){
+   try{
+    say('Cargando: '+f.name);
+    const data=await readAudioFile(f);
+    const buffer=await decodeAudio(data);
+    let i=tgt!=null&&fs.length===1?tgt:CH.findIndex((d,j)=>d[3].test(f.name)&&!S[j].buf);
+    if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);
+    if(i<0)i=7;
+    S[i].buf=buffer;S[i].name=f.name;loaded++;
+   }catch(err){failed.push(f.name+': '+(err&&err.message?err.message:'formato no compatible'))}
+  }
+ }catch(err){failed.push('Audio Android: '+(err&&err.message?err.message:'no disponible'))}
+ tgt=null;e.target.value='';lib();$('#sk').max=dur();pos=oldPos;
+ if(wasPlaying&&loaded)play();
+ if(loaded&&failed.length)say('Cargadas '+loaded+' canción(es). No se pudieron leer: '+failed.join(' | '));
+ else if(loaded)say('Listo: '+loaded+' canción(es) cargadas. Ya aparecen en los canales.');
+ else say('No se pudo cargar el audio. '+(failed.join(' | ')||'Vuelve a seleccionar el archivo.'));
+};
 /* transporte */
 const cur=()=>playing?Math.max(0,ctx.currentTime-startAt):pos;
 function stopSrc(){S.forEach(s=>{if(s.src){try{s.src.stop()}catch(e){}s.src=null}})}
