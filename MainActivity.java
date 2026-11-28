@@ -10,6 +10,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
+import android.provider.OpenableColumns;
+import android.database.Cursor;
+import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.json.JSONObject;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -27,13 +34,13 @@ public class MainActivity extends Activity {
     private static final int SAVE_REQUEST = 4103;
     private static final int MIC_REQUEST = 4104;
     private OutputStream exportStream;
+    private final ExecutorService audioExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicInteger audioImportIds = new AtomicInteger(1);
+    private int pendingAudioTarget = -1;
 
     private class IAMBridge {
-        @JavascriptInterface public void openAudioPicker() {
-            runOnUiThread(() -> {
-                if (web != null) web.evaluateJavascript(
-                    "(function(){var f=document.getElementById('fi');if(f){f.value='';f.click();}})();", null);
-            });
+        @JavascriptInterface public void openAudioPicker(int target) {
+            runOnUiThread(() -> launchAudioPicker(target));
         }
         @JavascriptInterface public void createWav(String name) {
             runOnUiThread(() -> {
@@ -111,35 +118,79 @@ public class MainActivity extends Activity {
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                // El selector debe mostrar la biblioteca de audio del teléfono.
-                // Usar */* + EXTRA_MIME_TYPES evita que algunos selectores Samsung
-                // oculten canciones cuando reciben audio/* directamente.
-                intent.setType("*/*");
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                    "audio/*", "audio/mpeg", "audio/mp3", "audio/wav",
-                    "audio/x-wav", "audio/mp4", "audio/aac", "audio/flac",
-                    "audio/ogg", "audio/3gpp"
-                });
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,
-                    params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                try {
-                    // Lanzar el selector directamente evita que algunos WebView Samsung
-                    // pierdan el resultado al volver desde el chooser envolvente.
-                    startActivityForResult(intent, FILE_REQUEST);
-                } catch (Exception e) {
-                    fileCallback = null;
-                    callback.onReceiveValue(null);
-                    return false;
-                }
+                launchAudioPicker(-1);
                 return true;
             }
         });
         setContentView(web);
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void launchAudioPicker(int target) {
+        pendingAudioTarget = target;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+            "audio/*", "audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav",
+            "audio/mp4", "audio/aac", "audio/flac", "audio/ogg", "audio/3gpp"
+        });
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        try { startActivityForResult(intent, FILE_REQUEST); }
+        catch (Exception e) {
+            sendAudioJs("window.IAMReceiveAudioBatchDone && window.IAMReceiveAudioBatchDone()");
+            notifySave(false, "No se pudo abrir la biblioteca de música: " + e.getMessage());
+        }
+    }
+
+    private void sendAudioJs(String script) {
+        if (web != null) web.post(() -> {
+            if (web != null) web.evaluateJavascript(script, null);
+        });
+    }
+
+    private String displayName(Uri uri) {
+        String name = "Audio";
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int col = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (col >= 0) name = cursor.getString(col);
+            }
+        } catch (Exception ignored) {
+        } finally { if (cursor != null) cursor.close(); }
+        return name == null ? "Audio" : name;
+    }
+
+    private void importAudioUris(ArrayList<Uri> uris, int target) {
+        if (uris == null || uris.isEmpty()) {
+            sendAudioJs("window.IAMReceiveAudioBatchStart && window.IAMReceiveAudioBatchStart(0,-1);window.IAMReceiveAudioBatchDone && window.IAMReceiveAudioBatchDone()");
+            return;
+        }
+        final int chosenTarget = target;
+        sendAudioJs("window.IAMReceiveAudioBatchStart && window.IAMReceiveAudioBatchStart(" + uris.size() + "," + chosenTarget + ")");
+        audioExecutor.execute(() -> {
+            for (Uri uri : uris) {
+                int id = audioImportIds.getAndIncrement();
+                String name = displayName(uri);
+                sendAudioJs("window.IAMReceiveAudioStart && window.IAMReceiveAudioStart(" + id + "," + JSONObject.quote(name) + ")");
+                try (InputStream in = getContentResolver().openInputStream(uri)) {
+                    if (in == null) throw new IllegalStateException("Android no pudo abrir el archivo");
+                    byte[] buffer = new byte[48 * 1024];
+                    int count;
+                    while ((count = in.read(buffer)) != -1) {
+                        String chunk = Base64.encodeToString(buffer, 0, count, Base64.NO_WRAP);
+                        sendAudioJs("window.IAMReceiveAudioChunk && window.IAMReceiveAudioChunk(" + id + ",'" + chunk + "')");
+                    }
+                    sendAudioJs("window.IAMReceiveAudioDone && window.IAMReceiveAudioDone(" + id + ")");
+                } catch (Exception e) {
+                    sendAudioJs("window.IAMReceiveAudioError && window.IAMReceiveAudioError(" + id + "," + JSONObject.quote(name + ": " + e.getMessage()) + ")");
+                }
+            }
+            sendAudioJs("window.IAMReceiveAudioBatchDone && window.IAMReceiveAudioBatchDone()");
+        });
     }
 
     @Override public void onRequestPermissionsResult(int code, String[] perms, int[] results) {
@@ -153,31 +204,26 @@ public class MainActivity extends Activity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == FILE_REQUEST && fileCallback != null) {
-            Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
-            if (result == null && resultCode == RESULT_OK && data != null) {
-                ArrayList<Uri> selected = new ArrayList<>();
+        if (requestCode == FILE_REQUEST) {
+            ArrayList<Uri> selected = new ArrayList<>();
+            if (resultCode == RESULT_OK && data != null) {
                 ClipData clip = data.getClipData();
                 if (clip != null) {
                     for (int i = 0; i < clip.getItemCount(); i++) {
                         Uri uri = clip.getItemAt(i).getUri();
                         if (uri != null) selected.add(uri);
                     }
-                } else if (data.getData() != null) {
-                    selected.add(data.getData());
-                }
-                if (!selected.isEmpty()) result = selected.toArray(new Uri[0]);
-            }
-            if (result != null && data != null &&
-                (data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
-                for (Uri uri : result) {
-                    try { getContentResolver().takePersistableUriPermission(
-                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); }
-                    catch (Exception ignored) { /* El permiso temporal sigue siendo válido. */ }
+                } else if (data.getData() != null) selected.add(data.getData());
+                if ((data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                    for (Uri uri : selected) {
+                        try { getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); }
+                        catch (Exception ignored) { }
+                    }
                 }
             }
-            fileCallback.onReceiveValue(result);
-            fileCallback = null;
+            if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
+            importAudioUris(selected, pendingAudioTarget);
+            pendingAudioTarget = -1;
         } else if (requestCode == SAVE_REQUEST) {
             if (resultCode == RESULT_OK && data != null && data.getData() != null) {
                 try {
@@ -195,6 +241,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         closeExport();
+        audioExecutor.shutdownNow();
         if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
         if (web != null) { web.destroy(); web = null; }
         super.onDestroy();
