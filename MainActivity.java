@@ -29,6 +29,12 @@ public class MainActivity extends Activity {
     private OutputStream exportStream;
 
     private class IAMBridge {
+        @JavascriptInterface public void openAudioPicker() {
+            runOnUiThread(() -> {
+                if (web != null) web.evaluateJavascript(
+                    "(function(){var f=document.getElementById('fi');if(f){f.value='';f.click();}})();", null);
+            });
+        }
         @JavascriptInterface public void createWav(String name) {
             runOnUiThread(() -> {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
