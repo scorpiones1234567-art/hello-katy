@@ -127,7 +127,9 @@ public class MainActivity extends Activity {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION |
                     Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                 try {
-                    startActivityForResult(Intent.createChooser(intent, "Selecciona tu música"), FILE_REQUEST);
+                    // Lanzar el selector directamente evita que algunos WebView Samsung
+                    // pierdan el resultado al volver desde el chooser envolvente.
+                    startActivityForResult(intent, FILE_REQUEST);
                 } catch (Exception e) {
                     fileCallback = null;
                     callback.onReceiveValue(null);
@@ -152,15 +154,27 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_REQUEST && fileCallback != null) {
-            Uri[] result = null;
-            if (resultCode == RESULT_OK && data != null) {
+            Uri[] result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
+            if (result == null && resultCode == RESULT_OK && data != null) {
                 ArrayList<Uri> selected = new ArrayList<>();
                 ClipData clip = data.getClipData();
-                if (clip != null) for (int i = 0; i < clip.getItemCount(); i++) {
-                    Uri uri = clip.getItemAt(i).getUri();
-                    if (uri != null) selected.add(uri);
-                } else if (data.getData() != null) selected.add(data.getData());
+                if (clip != null) {
+                    for (int i = 0; i < clip.getItemCount(); i++) {
+                        Uri uri = clip.getItemAt(i).getUri();
+                        if (uri != null) selected.add(uri);
+                    }
+                } else if (data.getData() != null) {
+                    selected.add(data.getData());
+                }
                 if (!selected.isEmpty()) result = selected.toArray(new Uri[0]);
+            }
+            if (result != null && data != null &&
+                (data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                for (Uri uri : result) {
+                    try { getContentResolver().takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION); }
+                    catch (Exception ignored) { /* El permiso temporal sigue siendo válido. */ }
+                }
             }
             fileCallback.onReceiveValue(result);
             fileCallback = null;
