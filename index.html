@@ -91,7 +91,7 @@ html,body{overflow:auto;height:auto}
   <div class="fr"><span>Limitador</span><button class="tg" data-m="limOn">ON</button></div><div class="fr"><span>Limpieza</span><button class="tg" data-m="clean">ON</button></div><div class="fr"><span>Anti-ruido</span><div class="k" id="k-thr"></div><button class="tg" data-m="gate">ON</button></div></div>
 </div>
 <div class="bar"><input id="fi" type="file" accept="audio/*" multiple hidden>
- <button id="op">📂 Abrir archivos</button><button id="rs">⏮ Inicio</button><button id="sv">💾 Guardar mezcla</button><button id="mc">🎙 MIC</button><button id="rc" class="rec">● GRABAR EN VIVO</button><button id="zm">🔍 −</button><button id="zp">🔍 ＋</button>
+ <button id="op" type="button" onclick="if(window.IAMAndroid){IAMAndroid.openAudioPicker()}else{document.getElementById('fi').click()}">📂 Abrir archivos</button><button id="rs">⏮ Inicio</button><button id="sv">💾 Guardar mezcla</button><button id="mc">🎙 MIC</button><button id="rc" class="rec">● GRABAR EN VIVO</button><button id="zm">🔍 −</button><button id="zp">🔍 ＋</button>
  <button id="ex" class="go">⬇ Exportar WAV</button>
  <select id="q"><option value="24-48">24 bit · 48 kHz</option><option value="24-96">24 bit · 96 kHz (máx. 4 min)</option><option value="32-48">32 bit float · 48 kHz</option></select><span class="wh">I-A-M</span></div>
 <div id="st">Abre tus stems: se asignan solos por nombre (voz, batería, bajo…). También puedes tocar el nombre de un canal.</div>
