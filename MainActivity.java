@@ -170,8 +170,13 @@ public class MainActivity extends Activity {
     }
 
     private void sendAudioJs(String script) {
-        if (web != null) web.post(() -> {
-            if (web != null) web.evaluateJavascript(script, null);
+        WebView target = web;
+        if (target == null) return;
+        target.post(() -> {
+            if (web == target) {
+                try { target.evaluateJavascript(script, null); }
+                catch (Exception e) { android.util.Log.e("IAM_AUDIO", "No se pudo enviar audio a JavaScript", e); }
+            }
         });
     }
 
@@ -203,7 +208,8 @@ public class MainActivity extends Activity {
                 sendAudioJs("window.IAMReceiveAudioStart && window.IAMReceiveAudioStart(" + id + "," + JSONObject.quote(name) + ")");
                 try (InputStream in = getContentResolver().openInputStream(uri)) {
                     if (in == null) throw new IllegalStateException("Android no pudo abrir el archivo");
-                    byte[] buffer = new byte[48 * 1024];
+                    // Bloques pequeños para que WebView reciba cada llamada sin saturarse.
+                    byte[] buffer = new byte[12 * 1024];
                     int count;
                     while ((count = in.read(buffer)) != -1) {
                         String chunk = Base64.encodeToString(buffer, 0, count, Base64.NO_WRAP);
