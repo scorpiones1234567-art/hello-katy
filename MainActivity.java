@@ -1,26 +1,31 @@
 package com.iam.musicstudio;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
+    private PermissionRequest pendingPerm;
     private static final int FILE_REQUEST = 4102;
     private static final int SAVE_REQUEST = 4103;
+    private static final int MIC_REQUEST = 4104;
     private OutputStream exportStream;
 
     private class IAMBridge {
@@ -37,8 +42,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void writeWavChunk(String base64) {
             try {
                 if (exportStream == null) throw new IllegalStateException("No hay archivo de destino");
-                byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
-                exportStream.write(bytes);
+                exportStream.write(Base64.decode(base64, Base64.DEFAULT));
             } catch (Exception e) {
                 closeExport();
                 notifySave(false, "Error escribiendo WAV: " + e.getMessage());
@@ -65,6 +69,7 @@ public class MainActivity extends Activity {
         try { if (exportStream != null) exportStream.close(); } catch (Exception ignored) {}
         exportStream = null;
     }
+
     private void notifySave(boolean ok, String message) {
         if (web != null) {
             String safe = message.replace("\\", "\\\\").replace("'", "\\'");
@@ -75,6 +80,7 @@ public class MainActivity extends Activity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
+        web.setKeepScreenOn(true);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -82,9 +88,20 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
         web.addJavascriptInterface(new IAMBridge(), "IAMAndroid");
         web.setWebViewClient(new WebViewClient());
         web.setWebChromeClient(new WebChromeClient() {
+            @Override public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(() -> {
+                    if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        pendingPerm = request;
+                        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MIC_REQUEST);
+                    } else request.grant(request.getResources());
+                });
+            }
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
@@ -106,6 +123,15 @@ public class MainActivity extends Activity {
         });
         setContentView(web);
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    @Override public void onRequestPermissionsResult(int code, String[] perms, int[] results) {
+        super.onRequestPermissionsResult(code, perms, results);
+        if (code == MIC_REQUEST && pendingPerm != null) {
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) pendingPerm.grant(pendingPerm.getResources());
+            else pendingPerm.deny();
+            pendingPerm = null;
+        }
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -137,6 +163,7 @@ public class MainActivity extends Activity {
     @Override public void onBackPressed() {
         if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed();
     }
+
     @Override protected void onDestroy() {
         closeExport();
         if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
