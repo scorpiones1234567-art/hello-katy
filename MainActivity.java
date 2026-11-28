@@ -105,7 +105,32 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
         web.addJavascriptInterface(new IAMBridge(), "IAMAndroid");
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // Enlace nativo de respaldo: el botón abre Android aunque falle
+                // algún controlador JavaScript de la consola.
+                String js = "(function(){"
+                    + "var b=document.getElementById('op');"
+                    + "if(b && !b.dataset.iamNativeBound){"
+                    + "b.dataset.iamNativeBound='1';"
+                    + "b.addEventListener('click',function(e){"
+                    + "e.preventDefault();e.stopImmediatePropagation();"
+                    + "if(window.IAMAndroid){window.IAMAndroid.openAudioPicker(-1);}"
+                    + "else if(window.IAMNativePickerStatus){window.IAMNativePickerStatus('No se encontró el puente Android');}"
+                    + "},true);"
+                    + "}"
+                    + "document.querySelectorAll('.nm').forEach(function(n){"
+                    + "if(n.dataset.iamNativeBound)return;n.dataset.iamNativeBound='1';"
+                    + "n.addEventListener('click',function(e){"
+                    + "e.preventDefault();e.stopImmediatePropagation();"
+                    + "if(window.IAMAndroid){window.IAMAndroid.openAudioPicker(Number(n.dataset.i));}"
+                    + "},true);"
+                    + "});"
+                    + "})();";
+                view.evaluateJavascript(js, null);
+            }
+        });
         web.setWebChromeClient(new WebChromeClient() {
             @Override public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
