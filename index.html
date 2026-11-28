@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=.4,maximum-scale=4,viewport-fit=cover">
 <meta name="theme-color" content="#05060f"><title>I-A-M Real Music Studio</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -57,15 +57,16 @@ input[type=range]{flex:1;accent-color:#ff63bd;min-width:40px}
 .bar button,.bar select{background:linear-gradient(#262c5a,#12162f);border:1px solid #5560b8;border-radius:9px;padding:9px 12px;font-weight:800;white-space:nowrap;flex:none}
 .bar .go{background:linear-gradient(#7c3cff,#3c1b9a)}.bar .wh{margin-left:auto;font:900 15px Georgia,serif;color:#e9c46a;letter-spacing:2px}
 #st{font-size:10px;color:#8b93b8;text-align:center;min-height:13px}
-@media(orientation:landscape) and (max-height:480px){
-.app{gap:4px;padding-top:3px;padding-bottom:3px}.top{height:27vh;min-height:88px}.pn{padding:5px}
-.brand small,.fl,.ttl{display:none}.logo{width:26px;height:26px;font-size:14px}.brand b{font-size:15px}
-.kn{grid-template-columns:repeat(3,1fr);gap:2px}.kw{font-size:7px}.k{width:22px;height:22px}.k:before{inset:3px}.k:after{height:6px;transform-origin:50% 9px}
-.nm b{display:inline;font-size:11px;margin-right:3px}.ch{flex-basis:72px;padding:3px}.fm{min-height:50px}
-.ms{width:100px}.ms .k{width:42px;height:42px}.ms .k:after{height:12px;transform-origin:50% 19px}.ms .mt{height:22px}.fx{width:124px;gap:3px}
-.bar button,.bar select{padding:6px 10px}.sp .h{font-size:9px}}
 @media(min-width:1000px){.ch{flex-basis:110px}.k{width:34px;height:34px}.k:after{transform-origin:50% 15px;height:10px}}
 @media(orientation:portrait){html,body{overflow:auto}.app{height:auto;min-height:100%}.top{grid-template-columns:1fr;height:auto}canvas{height:110px;flex:none}.row{flex-direction:column}.chs{min-height:300px}.ms,.fx{width:100%}}
+html,body{overflow:auto;height:auto}
+.app{display:flex;flex-direction:column;height:auto;min-height:100vh}
+.bar{order:-1;position:sticky;top:0;z-index:9;background:#05060ff2;flex-wrap:wrap;padding:4px 0;overflow:visible}
+.bar button,.bar select{padding:12px 15px;font-size:12px}.bar .rec{background:linear-gradient(#e11d48,#7f1030)}.bar button.on{outline:2px solid #ff63bd}
+.top{height:auto;min-height:0}canvas{flex:none;height:120px}.row{min-height:370px}.chs{min-height:370px}
+.ch{flex:1 0 98px}.k{width:34px;height:34px}.k:before{inset:5px}.k:after{height:10px;transform-origin:50% 15px}
+.kw{font-size:9px}.fd{width:28px}.fm{min-height:140px}.mt{width:11px}
+.bt button{font-size:10px;padding:9px 9px}.tg{width:46px;padding:7px 4px;font-size:10px}.tr button{padding:10px 13px}.fl{font-size:9px}
 </style></head><body><div class="app">
 <div class="top">
  <div class="pn"><div class="ttl">♫ MI BIBLIOTECA</div><div id="lib"></div></div>
@@ -89,19 +90,19 @@ input[type=range]{flex:1;accent-color:#ff63bd;min-width:40px}
   <div class="fr"><span>Limitador</span><button class="tg" data-m="limOn">ON</button></div></div>
 </div>
 <div class="bar"><input id="fi" type="file" accept="audio/*" multiple hidden>
- <button id="op">📂 Abrir archivos</button><button id="rs">⏮ Inicio</button><button id="sv">💾 Guardar mezcla</button>
+ <button id="op">📂 Abrir archivos</button><button id="rs">⏮ Inicio</button><button id="sv">💾 Guardar mezcla</button><button id="mc">🎙 MIC</button><button id="rc" class="rec">● GRABAR EN VIVO</button><button id="zm">🔍 −</button><button id="zp">🔍 ＋</button>
  <button id="ex" class="go">⬇ Exportar WAV</button>
- <select id="q"><option value="24">24 bit · 48 kHz</option><option value="32">32 bit float · 48 kHz</option></select><span class="wh">I-A-M</span></div>
+ <select id="q"><option value="24-48">24 bit · 48 kHz</option><option value="24-96">24 bit · 96 kHz (máx. 4 min)</option><option value="32-48">32 bit float · 48 kHz</option></select><span class="wh">I-A-M</span></div>
 <div id="st">Abre tus stems: se asignan solos por nombre (voz, batería, bajo…). También puedes tocar el nombre de un canal.</div>
 </div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const CH=[['Voz','🎤','#d946ef',/voz|vocal|voice|lead/i],['Batería','🥁','#38bdf8',/bater|drum|perc/i],['Bajo','🎸','#4ade80',/baj|bass/i],['Piano','🎹','#facc15',/piano|keys|tecl/i],['Guitarra','🎸','#22d3ee',/guit/i],['Cuerdas','🎻','#fb7185',/cuerd|string|viol|cello/i],['Metales','🎺','#34d399',/metal|brass|wind|trump|sax/i],['Pads','🎛','#a78bfa',/pad|synth|other|otro|ambient/i]];
-const S=CH.map(()=>({lo:0,mi:0,hi:0,pan:0,rev:.15,f:.75,mute:0,solo:0,buf:null,name:'',src:null,lv:0}));
+const CH=[['Voz','🎤','#d946ef',/voz|vocal|voice|lead/i],['Batería','🥁','#38bdf8',/bater|drum|perc/i],['Bajo','🎸','#4ade80',/baj|bass/i],['Piano','🎹','#facc15',/piano|keys|tecl/i],['Guitarra','🎸','#22d3ee',/guit/i],['Cuerdas','🎻','#fb7185',/cuerd|string|viol|cello/i],['Metales','🎺','#34d399',/metal|brass|wind|trump|sax/i],['Pads','🎛','#a78bfa',/pad|synth|other|otro|ambient/i],['En vivo','🎙','#ff5a5a',/^$/]];
+const S=CH.map(()=>({lo:0,mi:0,hi:0,pan:0,rev:.15,f:.75,mute:0,solo:0,off:0,buf:null,name:'',src:null,lv:0}));
 const M={vol:.85,rev:.35,dly:.2,revOn:1,dlyOn:1,compOn:1,limOn:1,e8:0,dep:.1,mov:.12,spd:.25,lv:0};
 try{const p=JSON.parse(localStorage.getItem('iamMix')||'null');if(p){Object.assign(M,p.M,{lv:0});p.S.forEach((x,i)=>Object.assign(S[i],x))}}catch(e){}
 let ctx,L,pos=0,startAt=0,playing=0,loop=0,tgt=null;
-const say=t=>$('#st').textContent=t,dur=()=>Math.max(0,...S.map(s=>s.buf?s.buf.duration:0));
+const say=t=>$('#st').textContent=t,dur=()=>Math.max(0,...S.map(s=>s.buf?s.buf.duration+s.off:0));
 const db=p=>p<.01?0:Math.pow(10,(p>=.75?(p-.75)*24:-60*(.75-p)/.75)/20);
 const fmt=s=>String(s/60|0).padStart(2,'0')+':'+(s%60).toFixed(1).padStart(4,'0');
 const apply=()=>{if(L)L.apply()};
@@ -151,13 +152,13 @@ $('#op').onclick=()=>{tgt=null;$('#fi').click()};
 function lib(){$('#lib').innerHTML=S.map((s,i)=>s.buf?`<div>♫ ${esc(s.name)} → ${CH[i][0]}</div>`:'').join('')||'<div class="e">Vacía. Pulsa “Abrir archivos”.</div>';S.forEach((s,i)=>$('#fl'+i).textContent=s.buf?s.name:'toca el nombre')}
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 $('#fi').onchange=async e=>{ensure();const fs=[...e.target.files],w=playing,p=pos;if(w)pause();
- for(const f of fs){try{const b=await ctx.decodeAudioData(await f.arrayBuffer());let i=tgt!=null&&fs.length==1?tgt:CH.findIndex((d,j)=>d[3].test(f.name)&&!S[j].buf);if(i<0)i=S.findIndex(s=>!s.buf);if(i<0)i=7;S[i].buf=b;S[i].name=f.name}catch(x){say('No pude leer '+f.name+' (prueba WAV o MP3)')}}
+ for(const f of fs){try{const b=await ctx.decodeAudioData(await f.arrayBuffer());let i=tgt!=null&&fs.length==1?tgt:CH.findIndex((d,j)=>d[3].test(f.name)&&!S[j].buf);if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);if(i<0)i=7;S[i].buf=b;S[i].name=f.name}catch(x){say('No pude leer '+f.name+' (prueba WAV o MP3)')}}
  tgt=null;e.target.value='';lib();$('#sk').max=dur();pos=p;say('Listo: '+S.filter(s=>s.buf).length+' canales cargados.');if(w)play()};
 /* transporte */
 const cur=()=>playing?Math.max(0,ctx.currentTime-startAt):pos;
 function stopSrc(){S.forEach(s=>{if(s.src){try{s.src.stop()}catch(e){}s.src=null}})}
 function play(){if(!dur()){say('Abre tus stems primero.');return}ensure();ctx.resume();stopSrc();if(pos>=dur())pos=0;const t0=ctx.currentTime+.12;startAt=t0-pos;
- S.forEach((s,i)=>{if(!s.buf||pos>=s.buf.duration)return;const b=ctx.createBufferSource();b.buffer=s.buf;b.connect(L.ch[i].lo);b.start(t0,pos);s.src=b});playing=1;$('#pl').textContent='❚❚'}
+ S.forEach((s,i)=>{if(!s.buf||pos>=s.buf.duration+s.off)return;const b=ctx.createBufferSource();b.buffer=s.buf;b.connect(L.ch[i].lo);const d=s.off-pos;d>0?b.start(t0+d,0):b.start(t0,-d);s.src=b});playing=1;$('#pl').textContent='❚❚'}
 function pause(){if(playing){pos=cur();stopSrc();playing=0;$('#pl').textContent='▶'}}
 function seek(t){const w=playing;pause();pos=Math.max(0,Math.min(dur(),t));if(w)play()}
 $('#pl').onclick=()=>playing?pause():play();$('#rs').onclick=()=>seek(0);$('#b5').onclick=()=>seek(cur()-5);$('#f5').onclick=()=>seek(cur()+5);
@@ -184,13 +185,24 @@ function saveAndroid(ab,name){return new Promise((ok,no)=>{let end=0;
  window.IAMNativeSaveDone=(r,m)=>{if(end)return;end=1;r?ok(m):no(Error(m||'Error al guardar'))};
  window.IAMAndroid.createWav(name)})}
 $('#ex').onclick=async()=>{if(!dur()){say('No hay nada que exportar.');return}const bt=$('#ex');bt.disabled=true;
- try{const bits=+$('#q').value,rate=48000,len=Math.ceil((dur()+2.5)*rate);if(len>rate*900)throw Error('La mezcla supera 15 minutos');
+ try{const [bits,rate]=$('#q').value.split('-').map(Number);if(rate>48000&&dur()>240)throw Error('96 kHz permite máx. 4 minutos; usa 48 kHz');const len=Math.ceil((dur()+2.5)*rate);if(len>rate*900)throw Error('La mezcla supera 15 minutos');
   say('Mezclando…');const off=new OfflineAudioContext(2,len,rate),G=graph(off);G.master.connect(off.destination);
-  S.forEach((s,i)=>{if(!s.buf)return;const b=off.createBufferSource();b.buffer=s.buf;b.connect(G.ch[i].lo);b.start(0)});
-  const ab=wav(await off.startRendering(),bits),name='IAM_Mezcla_'+bits+'bit.wav';
+  S.forEach((s,i)=>{if(!s.buf)return;const b=off.createBufferSource();b.buffer=s.buf;b.connect(G.ch[i].lo);b.start(s.off)});
+  const ab=wav(await off.startRendering(),bits),name='IAM_Mezcla_'+bits+'bit_'+rate/1000+'k.wav';
   if(window.IAMAndroid)await saveAndroid(ab,name);else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ab],{type:'audio/wav'}));a.download=name;a.click()}
   say('¡Mezcla guardada! '+name)}catch(e){say('No se pudo exportar: '+e.message)}finally{bt.disabled=false}};
 /* guardar ajustes */
 $('#sv').onclick=()=>{try{localStorage.setItem('iamMix',JSON.stringify({M,S:S.map(({lo,mi,hi,pan,rev,f})=>({lo,mi,hi,pan,rev,f}))}));say('Ajustes de mezcla guardados. Los audios hay que abrirlos de nuevo.')}catch(e){say('No se pudo guardar.')}};
 lib();
+let mic=null,msrc=null,rec=null,chunks=[],recPos=0;
+async function micOn(){ensure();ctx.resume();if(mic)return true;try{mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});msrc=ctx.createMediaStreamSource(mic);msrc.connect(L.ch[8].lo);$('#mc').classList.add('on');say('Micrófono activo. Usa audífonos para evitar acople.');return true}catch(e){say('Sin acceso al micrófono: acepta el permiso de Android.');return false}}
+function recStop(){if(rec&&rec.state=='recording')rec.stop();$('#rc').classList.remove('on');$('#rc').textContent='● GRABAR EN VIVO';if(playing)pause()}
+function micOff(){recStop();if(msrc){msrc.disconnect();msrc=null}if(mic){mic.getTracks().forEach(t=>t.stop());mic=null}$('#mc').classList.remove('on')}
+$('#mc').onclick=()=>mic?micOff():micOn();
+$('#rc').onclick=async()=>{if(rec&&rec.state=='recording'){recStop();return}if(!(await micOn()))return;S[8].buf=null;chunks=[];rec=new MediaRecorder(mic);rec.ondataavailable=e=>chunks.push(e.data);recPos=cur();
+ rec.onstop=async()=>{try{S[8].buf=await ctx.decodeAudioData(await new Blob(chunks).arrayBuffer());S[8].off=Math.max(0,recPos-.12);S[8].name='Toma en vivo';lib();$('#sk').max=dur();say('Toma guardada en el canal En vivo. Escúchala o exporta la mezcla.')}catch(e){say('No se pudo procesar la grabación.')}};
+ rec.start();$('#rc').classList.add('on');$('#rc').textContent='■ DETENER';if(!playing&&dur())play();say('Grabando… canta sobre la música.')};
+let Z=1;try{Z=+localStorage.getItem('iamZoom')||1}catch(e){}
+const zset=(z,m)=>{Z=Math.max(.5,Math.min(1.8,z));document.querySelector('.app').style.zoom=Z;try{localStorage.setItem('iamZoom',Z)}catch(e){}if(m)say('Zoom '+Math.round(Z*100)+'%')};
+zset(Z);$('#zm').onclick=()=>zset(Z-.1,1);$('#zp').onclick=()=>zset(Z+.1,1);
 </script></body></html>
