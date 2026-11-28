@@ -656,45 +656,107 @@ function lib(){
  });
 }
 
-/* IMPORTAR AUDIO */
+/* IMPORTAR AUDIO: ARCHIVOS DEL SELECTOR Y PUENTE NATIVO ANDROID */
 
-$('#fi').onchange=async e=>{
+async function importAudioFiles(fs,requestedTarget=null){
  ensure();
  await ctx.resume();
 
- const fs=[...e.target.files];
  const w=playing;
  const p=pos;
-
  if(w)pause();
 
+ let loaded=0;
  for(const f of fs){
   try{
    const b=await ctx.decodeAudioData(await f.arrayBuffer());
-
-   let i=tgt!=null&&fs.length===1?
-    tgt:
+   let i=requestedTarget!=null&&requestedTarget>=0&&fs.length===1?
+    requestedTarget:
     CH.findIndex((d,j)=>d[3].test(f.name)&&!S[j].buf);
 
    if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);
    if(i<0)i=7;
 
    S[i].buf=b;
-   S[i].name=f.name;
+   S[i].name=f.name||('Audio '+(i+1));
+   loaded++;
   }catch(x){
-   say('No pude leer '+f.name+' (prueba WAV o MP3).');
+   say('No pude leer '+(f.name||'el audio')+'. Prueba MP3 o WAV.');
   }
  }
 
  tgt=null;
- e.target.value='';
+ $('#fi').value='';
  lib();
  $('#sk').max=dur();
  pos=p;
 
- say('Listo: '+S.filter(s=>s.buf).length+' canales cargados.');
-
+ say(loaded?'Listo: '+loaded+' archivo(s) cargado(s) en la consola.':'No se pudo cargar ningún audio. Revisa el formato del archivo.');
  if(w)play();
+}
+
+$('#fi').onchange=async e=>{
+ const fs=[...e.target.files];
+ await importAudioFiles(fs,tgt);
+};
+
+/* Android envía el audio por bloques Base64 desde ACTION_OPEN_DOCUMENT. */
+let iamNativeBatch=null;
+
+window.IAMReceiveAudioBatchStart=(count,target)=>{
+ iamNativeBatch={count:Number(count)||0,target:Number(target),items:new Map(),files:[],errors:[]};
+};
+
+window.IAMReceiveAudioStart=(id,name)=>{
+ if(!iamNativeBatch)iamNativeBatch={count:0,target:-1,items:new Map(),files:[],errors:[]};
+ iamNativeBatch.items.set(Number(id),{name:String(name||'Audio'),chunks:[]});
+};
+
+window.IAMReceiveAudioChunk=(id,base64)=>{
+ if(!iamNativeBatch)return;
+ const item=iamNativeBatch.items.get(Number(id));
+ if(!item)return;
+ try{
+  const raw=atob(base64);
+  const bytes=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+  item.chunks.push(bytes);
+ }catch(err){
+  iamNativeBatch.errors.push('Bloque de audio dañado: '+item.name);
+ }
+};
+
+window.IAMReceiveAudioDone=(id)=>{
+ if(!iamNativeBatch)return;
+ const item=iamNativeBatch.items.get(Number(id));
+ if(!item)return;
+ const type=(item.name.match(/\.([^.]+)$/)||[])[1]||'';
+ const mime=({
+  mp3:'audio/mpeg',wav:'audio/wav',wave:'audio/wav',m4a:'audio/mp4',
+  aac:'audio/aac',flac:'audio/flac',ogg:'audio/ogg',opus:'audio/ogg',
+  mp4:'audio/mp4',3gp:'audio/3gpp'
+ })[type.toLowerCase()]||'application/octet-stream';
+ try{
+  iamNativeBatch.files.push(new File(item.chunks,item.name,{type:mime}));
+ }catch(err){
+  iamNativeBatch.errors.push('No se pudo preparar '+item.name);
+ }
+ iamNativeBatch.items.delete(Number(id));
+};
+
+window.IAMReceiveAudioError=(id,message)=>{
+ if(iamNativeBatch)iamNativeBatch.errors.push(String(message||'Error al leer un audio'));
+};
+
+window.IAMReceiveAudioBatchDone=async()=>{
+ const batch=iamNativeBatch;
+ iamNativeBatch=null;
+ if(!batch||!batch.files.length){
+  say(batch&&batch.errors.length?batch.errors.join(' · '):'No se seleccionó ningún archivo.');
+  return;
+ }
+ await importAudioFiles(batch.files,batch.target>=0?batch.target:null);
+ if(batch.errors.length)say('Audio cargado. Aviso: '+batch.errors.join(' · '));
 };
 
 /* TRANSPORTE Y AUTOMATIZACIÓN */
