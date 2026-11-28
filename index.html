@@ -150,8 +150,8 @@ $$('.fd').forEach(el=>{const i=+el.dataset.i,th=el.querySelector('.th'),paint=()
  el.ondblclick=()=>{S[i].f=.75;paint();apply();logAutomation('fader',i,'f',S[i].f)}});
 $('.bt button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,s=S[i],k=b.classList.contains('m')?'mute':'solo';s[k]^=1;b.classList.toggle('on',!!s[k]);apply();logAutomation(k,i,k,s[k])});
 $('.tg').forEach(b=>{const k=b.dataset.m,sync=()=>{b.classList.toggle('on',!!M[k]);b.textContent=M[k]?'ON':'OFF'};sync();b.onclick=()=>{M[k]^=1;sync();apply();logAutomation('toggle',-1,k,M[k])}});
-$$('.nm').forEach(el=>el.onclick=()=>{tgt=+el.dataset.i;$('#fi').click()});
-$('#op').onclick=()=>{tgt=null;$('#fi').click()};
+$('.nm').forEach(el=>el.onclick=()=>{tgt=+el.dataset.i;if(window.IAMAndroid)IAMAndroid.openAudioPicker(tgt);else $('#fi').click()});
+$('#op').onclick=()=>{tgt=null;if(window.IAMAndroid)IAMAndroid.openAudioPicker(-1);else $('#fi').click()};
 function lib(){$('#lib').innerHTML=S.map((s,i)=>s.buf?`<div>♫ ${esc(s.name)} → ${CH[i][0]}</div>`:'').join('')||'<div class="e">Vacía. Pulsa “Abrir archivos”.</div>';S.forEach((s,i)=>$('#fl'+i).textContent=s.buf?s.name:'toca el nombre')}
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function readAudioFile(file){
@@ -199,6 +199,50 @@ $('#fi').onchange=async e=>{
  else if(loaded)say('Listo: '+loaded+' canción(es) cargadas. Ya aparecen en los canales.');
  else say('No se pudo cargar el audio. '+(failed.join(' | ')||'Vuelve a seleccionar el archivo.'));
 };
+
+/* Importación nativa Android por bloques: no depende del selector de archivos WebView. */
+let iamNativeBatch=null;
+window.IAMReceiveAudioBatchStart=(total,target)=>{
+ const wasPlaying=playing,oldPos=pos;if(wasPlaying)pause();
+ iamNativeBatch={total,target,wasPlaying,oldPos,loaded:0,failed:[]};
+ say('Importando '+total+' archivo(s) desde Android...');
+};
+const iamNativeBuffers=new Map();
+window.IAMReceiveAudioStart=(id,name)=>{
+ iamNativeBuffers.set(id,{name,chunks:[],bytes:0});
+ say('Leyendo '+name+'...');
+};
+window.IAMReceiveAudioChunk=(id,b64)=>{
+ const item=iamNativeBuffers.get(id);if(!item)return;
+ const raw=atob(b64),chunk=new Uint8Array(raw.length);
+ for(let i=0;i<raw.length;i++)chunk[i]=raw.charCodeAt(i);
+ item.chunks.push(chunk);item.bytes+=chunk.length;
+};
+window.IAMReceiveAudioDone=async id=>{
+ const item=iamNativeBuffers.get(id);if(!item||!iamNativeBatch)return;
+ iamNativeBuffers.delete(id);
+ try{
+  const bytes=new Uint8Array(item.bytes);let offset=0;
+  for(const part of item.chunks){bytes.set(part,offset);offset+=part.length}
+  ensure();const buffer=await decodeAudio(bytes.buffer);
+  let i=iamNativeBatch.target>=0&&iamNativeBatch.total===1?iamNativeBatch.target:CH.findIndex((d,j)=>d[3].test(item.name)&&!S[j].buf);
+  if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);if(i<0)i=7;
+  S[i].buf=buffer;S[i].name=item.name;iamNativeBatch.loaded++;
+  lib();$('#sk').max=dur();
+ }catch(err){iamNativeBatch.failed.push(item.name+': '+(err&&err.message?err.message:'formato no compatible'))}
+};
+window.IAMReceiveAudioError=(id,message)=>{
+ iamNativeBuffers.delete(id);if(iamNativeBatch)iamNativeBatch.failed.push(message||'No se pudo leer un archivo');
+};
+window.IAMReceiveAudioBatchDone=()=>{
+ if(!iamNativeBatch)return;
+ const b=iamNativeBatch;iamNativeBatch=null;tgt=null;pos=b.oldPos;
+ if(b.wasPlaying&&b.loaded)play();
+ if(b.loaded&&b.failed.length)say('Cargadas '+b.loaded+'. Fallaron: '+b.failed.join(' | '));
+ else if(b.loaded)say('Listo: '+b.loaded+' canción(es) cargadas. Ya aparecen en los canales.');
+ else say('No se pudo cargar ninguna canción. '+(b.failed.join(' | ')||'Selecciona otro archivo MP3 o WAV.'));
+};
+
 /* transporte */
 const cur=()=>playing?Math.max(0,ctx.currentTime-startAt):pos;
 function stopSrc(){S.forEach(s=>{if(s.src){try{s.src.stop()}catch(e){}s.src=null}})}
