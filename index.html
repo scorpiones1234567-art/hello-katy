@@ -200,11 +200,14 @@ $('#fi').onchange=async e=>{
  else say('No se pudo cargar el audio. '+(failed.join(' | ')||'Vuelve a seleccionar el archivo.'));
 };
 
-/* Importación nativa Android por bloques: no depende del selector de archivos WebView. */
+/* Importación nativa Android por bloques. La decodificación se serializa
+   y BatchDone espera a que termine para no perder el archivo seleccionado. */
 let iamNativeBatch=null;
+let iamNativeDecodeChain=Promise.resolve();
 window.IAMReceiveAudioBatchStart=(total,target)=>{
  const wasPlaying=playing,oldPos=pos;if(wasPlaying)pause();
  iamNativeBatch={total,target,wasPlaying,oldPos,loaded:0,failed:[]};
+ iamNativeDecodeChain=Promise.resolve();
  say('Importando '+total+' archivo(s) desde Android...');
 };
 const iamNativeBuffers=new Map();
@@ -218,29 +221,42 @@ window.IAMReceiveAudioChunk=(id,b64)=>{
  for(let i=0;i<raw.length;i++)chunk[i]=raw.charCodeAt(i);
  item.chunks.push(chunk);item.bytes+=chunk.length;
 };
-window.IAMReceiveAudioDone=async id=>{
- const item=iamNativeBuffers.get(id);if(!item||!iamNativeBatch)return;
+window.IAMReceiveAudioDone=id=>{
+ const item=iamNativeBuffers.get(id);
+ const batch=iamNativeBatch;
+ if(!item||!batch)return;
  iamNativeBuffers.delete(id);
- try{
-  const bytes=new Uint8Array(item.bytes);let offset=0;
-  for(const part of item.chunks){bytes.set(part,offset);offset+=part.length}
-  ensure();const buffer=await decodeAudio(bytes.buffer);
-  let i=iamNativeBatch.target>=0&&iamNativeBatch.total===1?iamNativeBatch.target:CH.findIndex((d,j)=>d[3].test(item.name)&&!S[j].buf);
-  if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);if(i<0)i=7;
-  S[i].buf=buffer;S[i].name=item.name;iamNativeBatch.loaded++;
-  lib();$('#sk').max=dur();
- }catch(err){iamNativeBatch.failed.push(item.name+': '+(err&&err.message?err.message:'formato no compatible'))}
+ iamNativeDecodeChain=iamNativeDecodeChain.then(async()=>{
+  try{
+   const bytes=new Uint8Array(item.bytes);let offset=0;
+   for(const part of item.chunks){bytes.set(part,offset);offset+=part.length}
+   item.chunks.length=0;
+   ensure();
+   const buffer=await decodeAudio(bytes.buffer);
+   let i=batch.target>=0&&batch.total===1?batch.target:CH.findIndex((d,j)=>d[3].test(item.name)&&!S[j].buf);
+   if(i<0)i=S.findIndex((s,j)=>j<8&&!s.buf);
+   if(i<0)i=7;
+   S[i].buf=buffer;S[i].name=item.name;batch.loaded++;
+   lib();$('#sk').max=dur();
+  }catch(err){
+   batch.failed.push(item.name+': '+(err&&err.message?err.message:'formato no compatible'));
+  }
+ });
 };
 window.IAMReceiveAudioError=(id,message)=>{
- iamNativeBuffers.delete(id);if(iamNativeBatch)iamNativeBatch.failed.push(message||'No se pudo leer un archivo');
+ iamNativeBuffers.delete(id);
+ if(iamNativeBatch)iamNativeBatch.failed.push(message||'No se pudo leer un archivo');
 };
-window.IAMReceiveAudioBatchDone=()=>{
- if(!iamNativeBatch)return;
- const b=iamNativeBatch;iamNativeBatch=null;tgt=null;pos=b.oldPos;
- if(b.wasPlaying&&b.loaded)play();
- if(b.loaded&&b.failed.length)say('Cargadas '+b.loaded+'. Fallaron: '+b.failed.join(' | '));
- else if(b.loaded)say('Listo: '+b.loaded+' canción(es) cargadas. Ya aparecen en los canales.');
- else say('No se pudo cargar ninguna canción. '+(b.failed.join(' | ')||'Selecciona otro archivo MP3 o WAV.'));
+window.IAMReceiveAudioBatchDone=async()=>{
+ const batch=iamNativeBatch;
+ if(!batch)return;
+ await iamNativeDecodeChain;
+ if(iamNativeBatch!==batch)return;
+ iamNativeBatch=null;tgt=null;pos=batch.oldPos;
+ if(batch.wasPlaying&&batch.loaded)play();
+ if(batch.loaded&&batch.failed.length)say('Cargadas '+batch.loaded+'. Fallaron: '+batch.failed.join(' | '));
+ else if(batch.loaded)say('Listo: '+batch.loaded+' canción(es) cargadas. Ya aparecen en los canales.');
+ else say('No se pudo cargar ninguna canción. '+(batch.failed.join(' | ')||'Selecciona otro archivo MP3 o WAV.'));
 };
 
 /* transporte */
